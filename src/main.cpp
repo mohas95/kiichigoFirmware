@@ -14,9 +14,9 @@ class TB67S128FTG {
                     stbyPin(stbyPin), 
                     mode0Pin(mode0Pin), 
                     mode1Pin(mode1Pin), 
-                    mode2Pin(mode2Pin){
+                    mode2Pin(mode2Pin){}
 
-                    }
+        void set_speed(){}
 
 
     private:
@@ -24,4 +24,9 @@ class TB67S128FTG {
 
 
 
-}
+};
+
+int main(){
+
+
+};
