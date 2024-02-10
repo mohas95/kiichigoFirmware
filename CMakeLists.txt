@@ -28,7 +28,6 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 # link our executable with pico libraries
 target_link_libraries(${PROJECT_NAME} 
     pico_stdlib 
-    hardware_pwm
 )
 
 # enable usb output, disable uart output

@@ -2,7 +2,6 @@
 #define TB67S128FTG_HPP
 
 #include "pico/stdlib.h"
-#include "hardware/pwm.h"
 #include <array>
 
 class TB67S128FTG{
