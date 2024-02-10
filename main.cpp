@@ -1,10 +1,6 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 #include <stdio.h>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <tuple>
 
 using namespace std;
 
@@ -63,7 +59,7 @@ class TB67S128FTG{
 
         }
 
-        void step_pulse(bool direction = dir_state){
+        void step_pulse(bool direction = true){
 
             if (direction != dir_state){
                 set_direction(direction);
@@ -71,7 +67,7 @@ class TB67S128FTG{
 
             gpio_put(stepPin, true);
             sleep_us(1);
-            gpio_put(stepPin, false)
+            gpio_put(stepPin, false);
             // sleep_us(step_delay);
         }
 
@@ -79,14 +75,12 @@ class TB67S128FTG{
 
             dir_state = direction;
             gpio_put(dirPin, dir_state);
-            sleep_us()
         }
 
 
 
     private:
         unsigned int dirPin, stepPin, stbyPin, mode0Pin, mode1Pin, mode2Pin;
-        // unsigned long step_delay = 1000; // default delay time between steps in microseconds
         bool stby_state, mode0_state, mode1_state, mode2_state, dir_state;
 
 
@@ -101,8 +95,7 @@ int main(){
     while (true){
 
         stepper1.step_pulse();
-        sleep_us(1000000);
-
+        sleep_us(5000);
     }
     
 };
