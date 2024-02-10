@@ -8,15 +8,22 @@ set(PICO_SDK_FETCH_FROM_GIT on)
 # note: this must happen before project()
 include(pico_sdk_import.cmake)
 
-project(kiichigoFirmware)
+
+project(kiichigoFirmware C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # rest of your project
 
+# header files
+include_directories(include)
+
+
 # generate an executable from our source file
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 # link our executable with pico libraries
 target_link_libraries(${PROJECT_NAME} 
