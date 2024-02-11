@@ -1,10 +1,17 @@
-#ifndef TB67S128FTG_HPP
-#define TB67S128FTG_HPP
+#ifndef StepperMotorDriver_HPP
+#define StepperMotorDriver_HPP
 
 #include "pico/stdlib.h"
 #include <array>
 
-class TB67S128FTG{
+class StepperMotorDriver{
+    public:
+        virtual void step_pulse(bool direction = true) = 0;
+        virtual void set_direction(bool direction) = 0;
+    
+};
+
+class TB67S128FTG : public StepperMotorDriver{
     public:
         TB67S128FTG(unsigned int dirPin, unsigned int stepPin, unsigned int stbyPin, unsigned int mode0Pin, unsigned int mode1Pin, unsigned int mode2Pin)
         : dirPin(dirPin), stepPin(stepPin), stbyPin(stbyPin), mode0Pin(mode0Pin), mode1Pin(mode1Pin), mode2Pin(mode2Pin){
@@ -27,8 +34,26 @@ class TB67S128FTG{
             set_standby_mode(false);
             set_step_mode(FULL_STEP);
             set_direction(true); // Set default direction
+
         }
 
+        // StepperMotorDrive Parent pure virtual method overrides
+        void step_pulse(bool direction = true) override{
+            if (direction != dir_state){
+                set_direction(direction);
+            }
+
+            gpio_put(stepPin, true);
+            sleep_us(1);
+            gpio_put(stepPin, false);
+        }
+
+        void set_direction(bool direction) override{
+            dir_state = direction;
+            gpio_put(dirPin, dir_state);
+        }
+
+        // Class Specific Methods
         void set_standby_mode(bool active = false){
 
             stby_state = active;
@@ -46,23 +71,11 @@ class TB67S128FTG{
 
         }
 
-        void step_pulse(bool direction = true){
 
-            if (direction != dir_state){
-                set_direction(direction);
-            }
-
-            gpio_put(stepPin, true);
-            sleep_us(1);
-            gpio_put(stepPin, false);
-        }
-
-        void set_direction(bool direction){
-
-            dir_state = direction;
-            gpio_put(dirPin, dir_state);
-        }
-
+    private:
+        unsigned int dirPin, stepPin, stbyPin, mode0Pin, mode1Pin, mode2Pin;
+        bool stby_state, mode0_state, mode1_state, mode2_state, dir_state;
+        
         // Step modes defined as public static constexpr arrays
         static constexpr std::array<bool, 3> FULL_STEP = {false, false, false};
         static constexpr std::array<bool, 3> HALF_STEP = {false, false, true};
@@ -73,12 +86,9 @@ class TB67S128FTG{
         static constexpr std::array<bool, 3> ONE_64_STEP = {true, true, false};
         static constexpr std::array<bool, 3> ONE_128_STEP = {true, true, true};
 
-
-    private:
-        unsigned int dirPin, stepPin, stbyPin, mode0Pin, mode1Pin, mode2Pin;
-        bool stby_state, mode0_state, mode1_state, mode2_state, dir_state;
-
-
 };
 
-#endif // TB67S128FTG_HPP
+
+
+
+#endif
