@@ -14,7 +14,7 @@ All kinds of feedback and contributions are welcome.
 
 ## Contributors
 - Mohamed Debbagh
-    - [github](https://github.com/moha7108/), [website](moha7108.github.io/)
+    - [github](https://github.com/moha7108/), [website](https://moha7108.github.io/)
 
 ## Change Log
 ### 0.0.1 (Not released yet)

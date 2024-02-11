@@ -1,4 +1,3 @@
-// #include "TB67S128FTG.hpp"
 #include "StepperMotorDriver.hpp"
 #include "pico/stdlib.h"
 #include <string>
