@@ -9,6 +9,8 @@ class StepperMotorDriver{
         virtual void step_pulse() = 0;
         virtual void step_pulse(bool direction){}
         virtual void set_direction(bool direction) = 0;
+        virtual bool get_direction() = 0;
+
 };
 
 class TB67S128FTG : public StepperMotorDriver{
@@ -36,6 +38,16 @@ class TB67S128FTG : public StepperMotorDriver{
             set_direction(true); // Set default direction
         }
 
+        // Step modes defined as public static constexpr arrays
+        static constexpr std::array<bool, 3> FULL_STEP = {false, false, false};
+        static constexpr std::array<bool, 3> HALF_STEP = {false, false, true};
+        static constexpr std::array<bool, 3> QUARTER_STEP = {false, true, false};
+        static constexpr std::array<bool, 3> ONE_8_STEP = {false, true, true};
+        static constexpr std::array<bool, 3> ONE_16_STEP = {true, false, false};
+        static constexpr std::array<bool, 3> ONE_32_STEP = {true, false, true};
+        static constexpr std::array<bool, 3> ONE_64_STEP = {true, true, false};
+        static constexpr std::array<bool, 3> ONE_128_STEP = {true, true, true};
+
         // StepperMotorDrive Parent pure virtual method overrides
         void step_pulse() override{
             gpio_put(stepPin, true);
@@ -55,6 +67,10 @@ class TB67S128FTG : public StepperMotorDriver{
             gpio_put(dirPin, dir_state);
         }
 
+        bool get_direction() override{
+            return dir_state;
+        }
+
         // Class Specific Methods
         void set_standby_mode(bool active = false){
             stby_state = active;
@@ -69,21 +85,19 @@ class TB67S128FTG : public StepperMotorDriver{
             gpio_put(mode2Pin, mode2_state);
         }
 
+        bool get_stby_state(){
+            return stby_state; 
+        }
+
+        std::array<bool, 3> get_step_mode(){
+            std::array<bool, 3> step_mode = {mode0_state, mode1_state, mode2_state};
+            return step_mode;
+        }
 
     private:
         unsigned int dirPin, stepPin, stbyPin, mode0Pin, mode1Pin, mode2Pin;
         bool stby_state, mode0_state, mode1_state, mode2_state, dir_state;
         
-        // Step modes defined as public static constexpr arrays
-        static constexpr std::array<bool, 3> FULL_STEP = {false, false, false};
-        static constexpr std::array<bool, 3> HALF_STEP = {false, false, true};
-        static constexpr std::array<bool, 3> QUARTER_STEP = {false, true, false};
-        static constexpr std::array<bool, 3> ONE_8_STEP = {false, true, true};
-        static constexpr std::array<bool, 3> ONE_16_STEP = {true, false, false};
-        static constexpr std::array<bool, 3> ONE_32_STEP = {true, false, true};
-        static constexpr std::array<bool, 3> ONE_64_STEP = {true, true, false};
-        static constexpr std::array<bool, 3> ONE_128_STEP = {true, true, true};
-
 };
 
 
