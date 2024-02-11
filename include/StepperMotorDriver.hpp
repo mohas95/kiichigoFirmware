@@ -6,7 +6,8 @@
 
 class StepperMotorDriver{
     public:
-        virtual void step_pulse(bool direction = true) = 0;
+        virtual void step_pulse() = 0;
+        virtual void step_pulse(bool direction){}
         virtual void set_direction(bool direction) = 0;
     
 };
@@ -38,14 +39,17 @@ class TB67S128FTG : public StepperMotorDriver{
         }
 
         // StepperMotorDrive Parent pure virtual method overrides
-        void step_pulse(bool direction = true) override{
-            if (direction != dir_state){
-                set_direction(direction);
-            }
-
+        void step_pulse() override{
             gpio_put(stepPin, true);
             sleep_us(1);
             gpio_put(stepPin, false);
+        }
+
+        void step_pulse(bool direction) override{
+            if (direction != dir_state){
+                set_direction(direction);
+            }
+            step_pulse();
         }
 
         void set_direction(bool direction) override{

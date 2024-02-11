@@ -22,7 +22,7 @@ int main(){
     stdio_init_all();
 
     TB67S128FTG md1(0, 1, 2, 3, 4, 5);
-
+    
     StepperMotor stepper1(&md1);
     
 
