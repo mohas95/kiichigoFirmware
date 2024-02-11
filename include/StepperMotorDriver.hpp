@@ -9,7 +9,6 @@ class StepperMotorDriver{
         virtual void step_pulse() = 0;
         virtual void step_pulse(bool direction){}
         virtual void set_direction(bool direction) = 0;
-    
 };
 
 class TB67S128FTG : public StepperMotorDriver{
@@ -35,7 +34,6 @@ class TB67S128FTG : public StepperMotorDriver{
             set_standby_mode(false);
             set_step_mode(FULL_STEP);
             set_direction(true); // Set default direction
-
         }
 
         // StepperMotorDrive Parent pure virtual method overrides
@@ -59,20 +57,16 @@ class TB67S128FTG : public StepperMotorDriver{
 
         // Class Specific Methods
         void set_standby_mode(bool active = false){
-
             stby_state = active;
             gpio_put(stbyPin, !stby_state);
-
         }
 
         void set_step_mode(const std::array<bool, 3>& step_mode= FULL_STEP){
-
             mode0_state=step_mode[0], mode1_state=step_mode[1], mode2_state=step_mode[2];
 
             gpio_put(mode0Pin, mode0_state);
             gpio_put(mode1Pin, mode1_state);
             gpio_put(mode2Pin, mode2_state);
-
         }
 
 
