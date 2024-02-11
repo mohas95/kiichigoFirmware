@@ -18,4 +18,6 @@ All kinds of feedback and contributions are welcome.
 
 ## Change Log
 ### 0.0.1 (Not released yet)
+- initial stepper motor driver library
+    - support for TB67S128FTG stepper motor driver
 
