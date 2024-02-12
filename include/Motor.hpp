@@ -1,15 +1,15 @@
-#ifndef Motor
-#define Motor
+#ifndef Motor_HPP
+#define Motor_HPP
 
 #include "StepperMotorDriver.hpp"
 
 
-class Motor{
+class Motor {
     public:
-
+        virtual void test(){}
 };
 
-class StepperMotor : public Motor {
+class StepperMotor : public Motor{
     // revolutions per second
 
     public:
@@ -74,8 +74,6 @@ class StepperMotor : public Motor {
             queued_steps--;
             step_tracker++;
         }
-
-
 
     
 };
