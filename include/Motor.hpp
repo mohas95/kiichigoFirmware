@@ -7,6 +7,7 @@
 class Motor {
     public:
         virtual void test(){}
+        virtual void action(float speed, int steps, bool direction)=0;
 };
 
 class StepperMotor : public Motor{
@@ -19,7 +20,7 @@ class StepperMotor : public Motor{
         }
 
 
-        void action(float speed, int steps, bool direction){
+        void action(float speed, int steps, bool direction) override{
             reset_activity();
             set_speed(speed);
             driver->set_direction(direction);
@@ -45,7 +46,10 @@ class StepperMotor : public Motor{
             
         }
 
-        // void action_reader(){}
+        int get_delay_per_pulse(){
+            return delay_per_pulse;
+        }
+        
 
 
     private:
@@ -56,7 +60,7 @@ class StepperMotor : public Motor{
         int step_tracker = 0;
         float rev_tracker = 0;
         // int steps_left;
-        double delay_per_pulse = 5000; //microseconds
+        int delay_per_pulse = 5000; //microseconds
         float steps_per_second;
         float mm_per_rev;
 

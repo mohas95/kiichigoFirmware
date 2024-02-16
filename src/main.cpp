@@ -1,48 +1,56 @@
 #include "StepperMotorDriver.hpp"
 #include "Motor.hpp"
+#include "TaskManager.hpp"
 #include "pico/stdlib.h"
 #include <string>
 #include <memory>
 
 using namespace std;
 
-// struct StepperMotor{
-//     StepperMotorDriver* motor_driver; // pointer to (&obj) instance of a child of the StepperMotorDriver Class
-//     int steps_per_rev;
-//     string name;
 
-//     // StepperMotor Constructor
-//     StepperMotor(StepperMotorDriver* md, int steps_per_rev = 200, string name = "SM1") 
-//     : motor_driver(md), steps_per_rev(steps_per_rev), name(name){}
-// };
+Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction){
 
+    stepper_motor.action(speed, steps, direction);
+
+    auto func = [&stepper_motor](){
+        bool status = stepper_motor.step();
+        
+        return status;
+    };
+    
+    Task task(func, stepper_motor.get_delay_per_pulse());
+
+    return task;
+
+}
+ 
 
 int main(){
 
     stdio_init_all();
 
+    Scheduler motor_scheduler;
+
     TB67S128FTG md1(0, 1, 2, 3, 4, 5);
     
     StepperMotor stepper1(&md1, 200);
 
-    stepper1.action(1, 1000, true);
+    Task task1 = create_stepper_task(stepper1, 1,1000, true);
+
+    motor_scheduler.add_task(task1);
     
+    // stepper1.action(1, 1000, true);
 
-    while (true){
+    // absolute_time_t now;
+    // absolute_time_t stepper1_task = get_absolute_time();
+    // absolute_time_t stepper2_task = get_absolute_time();
 
-        stepper1.step();
-
-        sleep_us(5000);
-
-        // for(int i=0; i<1000; i++){
-        // stepper1.motor_driver -> step_pulse(true);
-        // sleep_us(5000);
-        // }
-
-        // for(int i=0; i<1000; i++){
-        // stepper1.motor_driver -> step_pulse(false);
-        // sleep_us(5000);
-        // }
-    }
+    motor_scheduler.run();
     
+    Task task2  = create_stepper_task(stepper1, 1, 1000, false);
+    motor_scheduler.add_task(task2);
+    motor_scheduler.run();
+
+    return 0;
+
 };
