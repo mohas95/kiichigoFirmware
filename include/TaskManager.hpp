@@ -7,25 +7,28 @@
 
 using namespace std;
 
+// should I turn this into a class?
 struct Task{
     
     bool status;
     function<bool()> func;
-
+    function<void()> setup_func;
     unsigned int interval;
-
     absolute_time_t lastRunTime;
-    
 
-    Task(function<bool()> func, int interval ) 
-    : func(func), interval(interval), lastRunTime(get_absolute_time()), status(true){}
+    Task(function<bool()> func, int interval, function<void()> setup_func = nullptr) 
+    : func(func), setup_func(setup_func), interval(interval), lastRunTime(get_absolute_time()), status(true){}
 
-    void excecute(){
-
+    void execute(){
         if (func){
             status = func();
         }
+    }
 
+    void begin(){
+        if (setup_func){
+            setup_func();
+        }
     }
 };
 
@@ -41,6 +44,13 @@ class Scheduler {
             bool allDone;
             absolute_time_t now;
 
+            // Run setup code once before running interval task
+            for (Task& task: task_list){
+                if (task.status){
+                    task.begin();
+                }
+            }
+
             do{
                 allDone = true;
 
@@ -50,7 +60,7 @@ class Scheduler {
 
                     if (task.status){
                         if(absolute_time_diff_us(task.lastRunTime,now)>=task.interval){
-                            task.excecute();
+                            task.execute();
                             task.lastRunTime=now;
                         }
                     }
@@ -62,11 +72,13 @@ class Scheduler {
 
                 
             } while(!allDone);
+        
+        task_list.clear();
 
         }
 
     private:
-        vector<Task> task_list;
+        vector<reference_wrapper<Task>> task_list;
 
 };
 
