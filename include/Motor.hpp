@@ -49,6 +49,11 @@ class StepperMotor : public Motor{
         int get_delay_per_pulse(){
             return delay_per_pulse;
         }
+
+        int get_delay_per_pulse(float revs_per_second){
+            
+            return (revs_per_second / steps_per_rev) * 1000000; // microseconds per step
+        }
         
 
 

@@ -20,7 +20,7 @@ Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bo
         return status;
     };
     
-    Task task(func, stepper_motor.get_delay_per_pulse(), setup_func);
+    Task task(func, stepper_motor.get_delay_per_pulse(speed), setup_func);
 
     return task;
 }
