@@ -7,6 +7,7 @@ The goal of this project is to make a stepper motor motion firmware for RP2040-b
 - Compatibility with G-code
 
 ## Example usage
+### motor library usage
 ```cpp
 #include "StepperMotorDriver.hpp"
 #include "Motor.hpp"
@@ -19,7 +20,7 @@ The goal of this project is to make a stepper motor motion firmware for RP2040-b
 
 using namespace std;
 
-Task execute_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction){
+Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction){
     // this is passing a preset setup function for the test, so that i can store the task
     auto setup_func = [&stepper_motor, speed, steps, direction](){
         stepper_motor.action(speed, steps, direction);
@@ -44,8 +45,8 @@ int main(){
     
     StepperMotor stepper1(&md1, 200);
 
-    Task task1 = execute_stepper_task(stepper1, 1,1000, true);
-    Task task2  = execute_stepper_task(stepper1, 1, 1000, false);    
+    Task task1 = create_stepper_task(stepper1, 1,1000, true);
+    Task task2  = create_stepper_task(stepper1, 1, 1000, false);    
 
     motor_scheduler.add_task(task1);
     motor_scheduler.run();
