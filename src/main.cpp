@@ -10,9 +10,6 @@
 using namespace std;
 
 Task execute_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction){
-
-    // stepper_motor.action(speed, steps, dir ection);
-
     // this is passing a preset setup function for the test, so that i can store the task
     auto setup_func = [&stepper_motor, speed, steps, direction](){
         stepper_motor.action(speed, steps, direction);
@@ -20,19 +17,16 @@ Task execute_stepper_task(StepperMotor& stepper_motor, float speed, int steps, b
 
     auto func = [&stepper_motor](){
         bool status = stepper_motor.step();
-        
         return status;
     };
     
     Task task(func, stepper_motor.get_delay_per_pulse(), setup_func);
 
     return task;
-
 }
  
 
 int main(){
-
     stdio_init_all();
 
     Scheduler motor_scheduler;
@@ -50,5 +44,4 @@ int main(){
     motor_scheduler.run();
 
     return 0;
-
 };
