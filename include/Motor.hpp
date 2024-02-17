@@ -30,7 +30,7 @@ class StepperMotor : public Motor{
 
         void set_speed(float revs_per_second){
 
-            delay_per_pulse = (revs_per_second / steps_per_rev) * 1000000; // microseconds per step
+            delay_per_pulse =  1000000 / (steps_per_rev*revs_per_second ); // microseconds per step
 
         }
 
@@ -52,7 +52,7 @@ class StepperMotor : public Motor{
 
         int get_delay_per_pulse(float revs_per_second){
             
-            return (revs_per_second / steps_per_rev) * 1000000; // microseconds per step
+            return 1000000 / (steps_per_rev*revs_per_second ); // microseconds per step
         }
         
 

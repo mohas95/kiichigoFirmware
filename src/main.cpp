@@ -35,12 +35,19 @@ int main(){
     StepperMotor stepper1(&md1, 200);
 
     Task task1 = create_stepper_task(stepper1, 1,1000, true);
-    Task task2  = create_stepper_task(stepper1, 1, 1000, false);    
+    Task task2  = create_stepper_task(stepper1, 2, 1000, false); 
+    Task task3  = create_stepper_task(stepper1, 3, 1000, false);    
+    Task task4  = create_stepper_task(stepper1, 4, 1000, false);    
+
 
     motor_scheduler.add_task(task1);
     motor_scheduler.run();
 
     motor_scheduler.add_task(task2);
+    motor_scheduler.run();
+    motor_scheduler.add_task(task3);
+    motor_scheduler.run();
+    motor_scheduler.add_task(task4);
     motor_scheduler.run();
 
     return 0;
