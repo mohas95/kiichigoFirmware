@@ -32,7 +32,7 @@ int main(){
     Scheduler motor_scheduler;
     TB67S128FTG md1(0, 1, 2, 3, 4, 5);
     
-    StepperMotor stepper1(&md1, 200, 1, 3);
+    StepperMotor stepper1(&md1, 200, 1, 180);
 
     Task task1 = create_stepper_task(stepper1, 1,200, true);
     // Task task2  = create_stepper_task(stepper1, 2, 1000, false); 

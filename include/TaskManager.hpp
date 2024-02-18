@@ -7,9 +7,7 @@
 
 using namespace std;
 
-// should I turn this into a class?
 struct Task{
-    
     bool status;
     function<bool()> func;
     function<void()> setup_func;
@@ -30,6 +28,7 @@ struct Task{
             setup_func();
         }
     }
+
 };
 
 

@@ -6,15 +6,15 @@
 
 class Motor {
     public:
-        virtual void test(){}
         virtual void action(float speed, int steps, bool direction)=0;
 };
 
 class StepperMotor : public Motor{
     // revolutions per second
+    // Speed is in revolutions per minute RPM
 
     public:
-        StepperMotor(StepperMotorDriver* driver, int steps_per_rev, int min_speed = 1, int max_speed = 3) 
+        StepperMotor(StepperMotorDriver* driver, int steps_per_rev,  int min_speed = 60, int max_speed = 180) 
         : driver(driver), steps_per_rev(steps_per_rev), min_speed(min_speed), max_speed(max_speed){}
 
         void action(float speed, int steps, bool direction) override{
@@ -24,15 +24,17 @@ class StepperMotor : public Motor{
             set_steps(steps);
         }
 
-        void set_speed(float revs_per_second){
+        void set_speed(float speed_RPM){
 
-            if (revs_per_second >= max_speed){
-                revs_per_second = max_speed;
-            } else if(revs_per_second <= min_speed){
-                revs_per_second = min_speed;
+            if (speed_RPM >= max_speed){
+                speed_RPM = max_speed;
+            } else if(speed_RPM <= min_speed){
+                speed_RPM = min_speed;
             }
 
-            delay_per_pulse =  1000000 / (steps_per_rev*revs_per_second ); // microseconds per step
+            float revs_per_second = speed_RPM/60;
+
+            delay_per_pulse =  1000000 / (steps_per_rev*revs_per_second); // microseconds per step
 
         }
 
@@ -48,16 +50,18 @@ class StepperMotor : public Motor{
         }
 
         int get_delay_per_pulse(){
-            return delay_per_pulse;
+            return delay_per_pulse; // microseconds per step
         }
 
-        int get_delay_per_pulse(float revs_per_second){
+        int get_delay_per_pulse(float speed_RPM){
 
-            if (revs_per_second >= max_speed){
-                revs_per_second = max_speed;
-            } else if(revs_per_second <= min_speed){
-                revs_per_second = min_speed;
+            if (speed_RPM >= max_speed){
+                speed_RPM = max_speed;
+            } else if(speed_RPM <= min_speed){
+                speed_RPM = min_speed;
             }
+
+            float revs_per_second = speed_RPM/60;
             
             return 1000000 / (steps_per_rev*revs_per_second ); // microseconds per step
         }
@@ -65,14 +69,12 @@ class StepperMotor : public Motor{
 
 
     private:
-
         unsigned int  steps_per_rev;
         StepperMotorDriver* driver;
         int queued_steps = 0;
         int step_tracker = 0;
         float rev_tracker = 0;
-        // int steps_left;
-        int delay_per_pulse = 5000; //microseconds
+        int delay_per_pulse = 5000; // microseconds
         float steps_per_second;
 
         int min_speed;
