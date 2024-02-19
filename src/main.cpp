@@ -31,43 +31,29 @@ int main(){
 
     Scheduler motor_scheduler;
     TB67S128FTG md1(0, 1, 2, 3, 4, 5);
+
+    vector<Task> task_list;
     
     StepperMotor stepper1(&md1, 200, 1, 180);
 
-    Task task1 = create_stepper_task(stepper1, 1,200, true);
-    // Task task2  = create_stepper_task(stepper1, 2, 1000, false); 
-    // Task task3  = create_stepper_task(stepper1, 3, 1000, true);    
-    // Task task4  = create_stepper_task(stepper1, 4, 1000, false);
-    // Task task5 = create_stepper_task(stepper1, 5,1000, true);
-    // Task task6  = create_stepper_task(stepper1, 6, 1000, false); 
-    // Task task7  = create_stepper_task(stepper1, 7, 1000, true);    
-    // Task task8  = create_stepper_task(stepper1, 8, 1000, false);   
-    // Task task9  = create_stepper_task(stepper1, 9, 1000, true);    
-    // Task task10  = create_stepper_task(stepper1, 10, 1000, false); 
+    for (int i=5;i<=180; i+=5){
 
+        task_list.push_back(create_stepper_task(stepper1, i, 200, true));
 
-    motor_scheduler.add_task(task1);
-    motor_scheduler.run();
-    // motor_scheduler.add_task(task2);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task3);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task4);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task5);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task6);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task7);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task8);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task9);
-    // motor_scheduler.run();
-    // motor_scheduler.add_task(task10);
-    // motor_scheduler.run();
+    }
+
+    for (int i=180;i>=5; i-=5){
+
+        task_list.push_back(create_stepper_task(stepper1, i, 200, false));
+
+    }
+
+        for (Task& task: task_list){
+
+        motor_scheduler.add_task(task);
+        motor_scheduler.run();
+    }
+
     
-    
-
     return 0;
 };
