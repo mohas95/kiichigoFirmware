@@ -31,28 +31,38 @@ Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bo
         return status;
     };
     
-    Task task(func, stepper_motor.get_delay_per_pulse(), setup_func);
+    Task task(func, stepper_motor.get_delay_per_pulse(speed), setup_func);
 
     return task;
 }
  
-
 int main(){
     stdio_init_all();
 
     Scheduler motor_scheduler;
     TB67S128FTG md1(0, 1, 2, 3, 4, 5);
+
+    vector<Task> task_list;
     
-    StepperMotor stepper1(&md1, 200);
+    StepperMotor stepper1(&md1, 200, 1, 180);
 
-    Task task1 = create_stepper_task(stepper1, 1,1000, true);
-    Task task2  = create_stepper_task(stepper1, 1, 1000, false);    
+    for (int i=5;i<=180; i+=5){
 
-    motor_scheduler.add_task(task1);
-    motor_scheduler.run();
+        task_list.push_back(create_stepper_task(stepper1, i, 200, true));
 
-    motor_scheduler.add_task(task2);
-    motor_scheduler.run();
+    }
+
+    for (int i=180;i>=5; i-=5){
+
+        task_list.push_back(create_stepper_task(stepper1, i, 200, false));
+
+    }
+
+        for (Task& task: task_list){
+
+        motor_scheduler.add_task(task);
+        motor_scheduler.run();
+    }
 
     return 0;
 };
