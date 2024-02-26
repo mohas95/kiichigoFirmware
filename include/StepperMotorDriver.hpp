@@ -3,6 +3,8 @@
 
 #include "pico/stdlib.h"
 #include <array>
+#include <vector>
+#include <functional>
 
 class StepperMotorDriver{
     public:
@@ -10,12 +12,14 @@ class StepperMotorDriver{
         virtual void step_pulse(bool direction){}
         virtual void set_direction(bool direction) = 0;
         virtual bool get_direction() = 0;
+        virtual void set_step_mode(unsigned int step_mode) = 0;
+        virtual unsigned int get_step_mode() = 0;
 
 };
 
 class TB67S128FTG : public StepperMotorDriver{
     public:
-        TB67S128FTG(unsigned int dirPin, unsigned int stepPin, unsigned int stbyPin, unsigned int mode0Pin, unsigned int mode1Pin, unsigned int mode2Pin)
+        TB67S128FTG(unsigned int dirPin, unsigned int stepPin, unsigned int stbyPin, unsigned int mode0Pin, unsigned int mode1Pin, unsigned int mode2Pin, const std::array<bool,3>& step_mode = FULL_STEP)
         : dirPin(dirPin), stepPin(stepPin), stbyPin(stbyPin), mode0Pin(mode0Pin), mode1Pin(mode1Pin), mode2Pin(mode2Pin){
             // initialize pins
             gpio_init(dirPin);
@@ -34,7 +38,7 @@ class TB67S128FTG : public StepperMotorDriver{
 
             // default states
             set_standby_mode(false);
-            set_step_mode(FULL_STEP);
+            set_step_mode(step_mode);
             set_direction(true); // Set default direction
         }
 
@@ -70,6 +74,38 @@ class TB67S128FTG : public StepperMotorDriver{
         bool get_direction() override{
             return dir_state;
         }
+        
+        void set_step_mode(unsigned int step_mode= 1) override{
+
+            const std::array<bool, 3>& mode_states = stepMode_to_modeStates(step_mode);
+            mode0_state=mode_states[0], mode1_state=mode_states[1], mode2_state=mode_states[2];
+
+            gpio_put(mode0Pin, mode0_state);
+            gpio_put(mode1Pin, mode1_state);
+            gpio_put(mode2Pin, mode2_state);
+        }
+
+        void set_step_mode(const std::array<bool, 3>& mode_states){
+
+            mode0_state=mode_states[0], mode1_state=mode_states[1], mode2_state=mode_states[2];
+
+            gpio_put(mode0Pin, mode0_state);
+            gpio_put(mode1Pin, mode1_state);
+            gpio_put(mode2Pin, mode2_state);
+        }
+
+        unsigned int get_step_mode() override{
+
+            std::array<bool, 3> mode_states = {mode0_state, mode1_state, mode2_state};
+            unsigned int step_mupltiplier = modeStates_to_stepMode(mode_states);
+            return step_mupltiplier;
+        }
+        
+        unsigned int get_step_mode(const std::array<bool,3> mode_states){
+
+            unsigned int step_mupltiplier = modeStates_to_stepMode(mode_states);
+            return step_mupltiplier;
+        }
 
         // Class Specific Methods
         void set_standby_mode(bool active = false){
@@ -77,26 +113,54 @@ class TB67S128FTG : public StepperMotorDriver{
             gpio_put(stbyPin, !stby_state);
         }
 
-        void set_step_mode(const std::array<bool, 3>& step_mode= FULL_STEP){
-            mode0_state=step_mode[0], mode1_state=step_mode[1], mode2_state=step_mode[2];
-
-            gpio_put(mode0Pin, mode0_state);
-            gpio_put(mode1Pin, mode1_state);
-            gpio_put(mode2Pin, mode2_state);
-        }
-
         bool get_stby_state(){
             return stby_state; 
-        }
-
-        std::array<bool, 3> get_step_mode(){
-            std::array<bool, 3> step_mode = {mode0_state, mode1_state, mode2_state};
-            return step_mode;
         }
 
     private:
         unsigned int dirPin, stepPin, stbyPin, mode0Pin, mode1Pin, mode2Pin;
         bool stby_state, mode0_state, mode1_state, mode2_state, dir_state;
+
+        unsigned int modeStates_to_stepMode(std::array<bool,3> mode_states){
+
+            if(mode_states == FULL_STEP){ return 1;
+            }else if(mode_states == HALF_STEP){ return 2;
+            }else if(mode_states == QUARTER_STEP){ return 4;
+            }else if(mode_states == ONE_8_STEP){ return 8;
+            }else if(mode_states == ONE_16_STEP){ return 16; 
+            }else if(mode_states == ONE_32_STEP){ return 32;
+            }else if(mode_states == ONE_64_STEP){ return 64;
+            }else if(mode_states == ONE_128_STEP){ return 128;
+            }else{
+                return 1;
+            }
+        }
+
+        const std::array<bool, 3>& stepMode_to_modeStates(unsigned int step_mode){
+
+            switch (step_mode)
+            {
+            case 1:
+                return FULL_STEP;
+            case 2:
+                return HALF_STEP;
+            case 4:
+                return QUARTER_STEP;
+            case 8:
+                return ONE_8_STEP;
+            case 16:
+                return ONE_16_STEP;
+            case 32:
+                return ONE_32_STEP;
+            case 64:
+                return ONE_64_STEP;
+            case 128:
+                return ONE_128_STEP;
+            default:
+                return FULL_STEP;
+            }
+
+        }
         
 };
 

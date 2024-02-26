@@ -6,19 +6,24 @@
 
 class Motor {
     public:
-        virtual void action(float speed, int steps, bool direction)=0;
+        virtual void action(float speed, int steps, bool direction, unsigned int step_mode)=0;
 };
 
 class StepperMotor : public Motor{
-    // revolutions per second
     // Speed is in revolutions per minute RPM
 
     public:
         StepperMotor(StepperMotorDriver* driver, int steps_per_rev,  int min_speed = 60, int max_speed = 180) 
-        : driver(driver), steps_per_rev(steps_per_rev), min_speed(min_speed), max_speed(max_speed){}
+        : driver(driver), steps_per_rev(steps_per_rev), min_speed(min_speed), max_speed(max_speed){
+            step_multiplier = driver->get_step_mode();
+        }
 
-        void action(float speed, int steps, bool direction) override{
+        void action(float speed, int steps, bool direction, unsigned int step_mode = false) override{
             reset_activity();
+            if (step_mode){
+                driver->set_step_mode(step_mode);
+                step_multiplier = driver->get_step_mode();
+            }
             set_speed(speed);
             driver->set_direction(direction);
             set_steps(steps);
@@ -34,8 +39,7 @@ class StepperMotor : public Motor{
 
             float revs_per_second = speed_RPM/60;
 
-            delay_per_pulse =  1000000 / (steps_per_rev*revs_per_second); // microseconds per step
-
+            delay_per_pulse =  1000000 / (steps_per_rev*step_multiplier*revs_per_second); // microseconds per step
         }
 
         bool step(){
@@ -53,7 +57,7 @@ class StepperMotor : public Motor{
             return delay_per_pulse; // microseconds per step
         }
 
-        int get_delay_per_pulse(float speed_RPM){
+        int get_delay_per_pulse(float speed_RPM, unsigned int step_mode){
 
             if (speed_RPM >= max_speed){
                 speed_RPM = max_speed;
@@ -63,19 +67,25 @@ class StepperMotor : public Motor{
 
             float revs_per_second = speed_RPM/60;
             
-            return 1000000 / (steps_per_rev*revs_per_second ); // microseconds per step
+            return 1000000 / (steps_per_rev*step_mode*revs_per_second ); // microseconds per step
         }
-        
 
+        unsigned int get_stepsPerRevolution(){
+            return steps_per_rev * step_multiplier;
+        }
+
+        unsigned int get_stepsPerRevolution(unsigned int step_mode){
+            return steps_per_rev *step_mode;
+        }
 
     private:
         unsigned int  steps_per_rev;
+        unsigned int step_multiplier;
         StepperMotorDriver* driver;
         int queued_steps = 0;
         int step_tracker = 0;
         float rev_tracker = 0;
         int delay_per_pulse = 5000; // microseconds
-        float steps_per_second;
 
         int min_speed;
         int max_speed;
@@ -95,7 +105,6 @@ class StepperMotor : public Motor{
             queued_steps--;
             step_tracker++;
         }
-
     
 };
 

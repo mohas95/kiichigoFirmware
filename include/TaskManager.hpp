@@ -9,12 +9,12 @@ using namespace std;
 
 struct Task{
     bool status;
-    function<bool()> func;
-    function<void()> setup_func;
-    unsigned int interval;
+    function<bool()> func; //func expects to return a bool value with the status of the motor's task
+    function<int()> setup_func; //setup_func expects to return an int with the interval after all params setup 
+    unsigned int interval; // if set manually the setup_func will not use its expected value
     absolute_time_t lastRunTime;
 
-    Task(function<bool()> func, int interval, function<void()> setup_func = nullptr) 
+    Task(function<bool()> func, function<int()> setup_func = nullptr, int interval = false) 
     : func(func), setup_func(setup_func), interval(interval), lastRunTime(get_absolute_time()), status(true){}
 
     void execute(){
@@ -25,7 +25,11 @@ struct Task{
 
     void begin(){
         if (setup_func){
-            setup_func();
+            if(!interval){
+                interval = setup_func();
+            }else{
+                setup_func();
+            }
         }
     }
 
