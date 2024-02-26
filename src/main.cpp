@@ -9,6 +9,8 @@
 
 using namespace std;
 
+unsigned int working_stepModes[4] = {1,4,32,128};
+
 Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction, unsigned int step_mode = 1){
     // this is passing a preset setup function for the test, so that i can store the task
     auto setup_func = [&stepper_motor, speed, steps, direction, step_mode](){

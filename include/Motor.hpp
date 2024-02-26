@@ -3,7 +3,6 @@
 
 #include "StepperMotorDriver.hpp"
 
-
 class Motor {
     public:
         virtual void action(float speed, int steps, bool direction, unsigned int step_mode)=0;
