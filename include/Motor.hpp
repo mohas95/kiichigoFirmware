@@ -10,11 +10,12 @@ class Motor {
 
 class StepperMotor : public Motor{
     // Speed is in revolutions per minute RPM
-
     public:
         StepperMotor(StepperMotorDriver* driver, int steps_per_rev,  int min_speed = 60, int max_speed = 180) 
         : driver(driver), steps_per_rev(steps_per_rev), min_speed(min_speed), max_speed(max_speed){
             step_multiplier = driver->get_step_mode();
+            unsigned int mid_speed = (max_speed - min_speed)/2;
+            set_speed(mid_speed); //Default speed
         }
 
         void action(float speed, int steps, bool direction, unsigned int step_mode = false) override{
@@ -88,17 +89,15 @@ class StepperMotor : public Motor{
         }
 
     private:
+        StepperMotorDriver* driver;
         unsigned int  steps_per_rev;
         unsigned int step_multiplier;
-        StepperMotorDriver* driver;
         int queued_steps = 0;
         int step_tracker = 0;
         float rev_tracker = 0;
-        int delay_per_pulse = 5000; // microseconds
-
+        int delay_per_pulse; // microseconds
         int min_speed;
         int max_speed;
-        // float mm_per_rev;
 
         void reset_activity(){
             queued_steps=0;

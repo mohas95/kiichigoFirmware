@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include "pico/stdlib.h"
+#include "Motor.hpp"
 
 using namespace std;
 
@@ -32,9 +33,7 @@ struct Task{
             }
         }
     }
-
 };
-
 
 class Scheduler {
     public:
@@ -84,6 +83,46 @@ class Scheduler {
         vector<reference_wrapper<Task>> task_list;
 
 };
+
+
+// This section is for functions specifically for generating specific tasks for special cases
+
+Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction, unsigned int step_mode = 1){
+    // this is passing a preset setup function for the test, so that i can store the task
+    auto setup_func = [&stepper_motor, speed, steps, direction, step_mode](){
+        stepper_motor.action(speed, steps, direction, step_mode);
+        
+        return stepper_motor.get_delay_per_pulse();
+    };
+
+    auto func = [&stepper_motor](){
+        bool status = stepper_motor.step();
+        return status;
+    };
+    
+    Task task(func, setup_func);
+
+    return task;
+}
+
+Task create_stepper_task(StepperMotor& stepper_motor, bool stby_mode){
+    // this is passing a preset setup function for the test, so that i can store the task
+    auto setup_func = [&stepper_motor, stby_mode](){
+        stepper_motor.action(stby_mode);
+
+        return stepper_motor.get_delay_per_pulse();
+    };
+
+    auto func = [&stepper_motor](){
+        bool status = stepper_motor.step();
+        return status;
+    };
+    
+    Task task(func, setup_func);
+
+    return task;
+}
+
 
 
 #endif
