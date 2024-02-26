@@ -19,6 +19,9 @@ class StepperMotor : public Motor{
 
         void action(float speed, int steps, bool direction, unsigned int step_mode = false) override{
             reset_activity();
+            if(driver->get_standby_mode()){
+                driver->set_standby_mode(false);
+            }
             if (step_mode){
                 driver->set_step_mode(step_mode);
                 step_multiplier = driver->get_step_mode();
@@ -26,6 +29,13 @@ class StepperMotor : public Motor{
             set_speed(speed);
             driver->set_direction(direction);
             set_steps(steps);
+        }
+
+        void action(bool stby_mode){
+            reset_activity();
+            if(stby_mode != driver->get_standby_mode()){
+            driver->set_step_mode(stby_mode);
+            }
         }
 
         void set_speed(float speed_RPM){

@@ -14,6 +14,8 @@ class StepperMotorDriver{
         virtual bool get_direction() = 0;
         virtual void set_step_mode(unsigned int step_mode) = 0;
         virtual unsigned int get_step_mode() = 0;
+        virtual void set_standby_mode(bool active){}
+        virtual bool get_standby_mode(){}
 
 };
 
@@ -107,14 +109,13 @@ class TB67S128FTG : public StepperMotorDriver{
             return step_mupltiplier;
         }
 
-        // Class Specific Methods
-        void set_standby_mode(bool active = false){
+        void set_standby_mode(bool active = false) override{
             stby_state = active;
             gpio_put(stbyPin, !stby_state);
         }
 
-        bool get_stby_state(){
-            return stby_state; 
+        bool get_standby_mode() override{
+            return stby_state;
         }
 
     private:
