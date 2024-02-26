@@ -58,10 +58,10 @@ int main(){
     
     StepperMotor stepper1(&md1, 200, 1, 180);
 
-    task_list.push_back(create_stepper_task(stepper1, 10, 800, true, 1));
-    task_list.push_back(create_stepper_task(stepper1, 10, 800*4, true, 4));
-    task_list.push_back(create_stepper_task(stepper1, 10, 800*32, true, 32));
-    task_list.push_back(create_stepper_task(stepper1, 10, 800*128, true, 128));
+    task_list.push_back(create_stepper_task(stepper1, 90, 800, true, 1));
+    task_list.push_back(create_stepper_task(stepper1, 90, 800*4, true, 4));
+    task_list.push_back(create_stepper_task(stepper1, 90, 800*32, true, 32));
+    task_list.push_back(create_stepper_task(stepper1, 90, 800*128, true, 128));
     task_list.push_back(create_stepper_task(stepper1, true));
 
 
@@ -82,7 +82,6 @@ int main(){
         motor_scheduler.add_task(task);
         motor_scheduler.run();
     }
-
     
     return 0;
 };

@@ -34,7 +34,7 @@ class StepperMotor : public Motor{
         void action(bool stby_mode){
             reset_activity();
             if(stby_mode != driver->get_standby_mode()){
-            driver->set_step_mode(stby_mode);
+                driver->set_standby_mode(stby_mode);
             }
         }
 
