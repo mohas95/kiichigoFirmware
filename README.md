@@ -54,13 +54,13 @@ int main(){
 
 ## Feedback
 All kinds of feedback and contributions are welcome.
-- [Create an issue](https://github.com/moha7108/kiichigoFirmware/issues)
-- [Create a pull request](https://github.com/moha7108/kiichigoFirmware/pulls)
-- reach out to @moha7108
+- [Create an issue](https://github.com/mohas95/kiichigoFirmware/issues)
+- [Create a pull request](https://github.com/mohas95/kiichigoFirmware/pulls)
+- reach out to @mohas95
 
 ## Contributors
 - Mohamed Debbagh
-    - [github](https://github.com/moha7108/), [website](https://moha7108.github.io/)
+    - [github](https://github.com/mohas05/), [website](https://mohas95.github.io/)
 
 ## Change Log
 ### 0.0.1 (Not released yet)
