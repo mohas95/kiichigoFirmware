@@ -19,7 +19,7 @@ class StepperMotor : public Motor{
         }
 
         void action(float speed, int steps, bool direction, unsigned int step_mode = false) override{
-            reset_activity();
+            reset_queue();
             if(driver->get_standby_mode()){
                 driver->set_standby_mode(false);
             }
@@ -33,7 +33,7 @@ class StepperMotor : public Motor{
         }
 
         void action(bool stby_mode){
-            reset_activity();
+            reset_queue();
             if(stby_mode != driver->get_standby_mode()){
                 driver->set_standby_mode(stby_mode);
             }
@@ -88,6 +88,13 @@ class StepperMotor : public Motor{
             return steps_per_rev *step_mode;
         }
 
+        void reset_step_tracker(){
+            step_tracker=0;
+        }
+        int get_step_tracker(){
+            return step_tracker;
+        }
+
     private:
         StepperMotorDriver* driver;
         unsigned int  steps_per_rev;
@@ -99,10 +106,10 @@ class StepperMotor : public Motor{
         int min_speed;
         int max_speed;
 
-        void reset_activity(){
+        void reset_queue(){
             queued_steps=0;
-            step_tracker=0;
-            rev_tracker=0;
+            // step_tracker=0;
+            // rev_tracker=0;
         }
 
         void set_steps(int steps){
@@ -111,7 +118,12 @@ class StepperMotor : public Motor{
 
         void update_step(){
             queued_steps--;
-            step_tracker++;
+
+            if(driver->get_direction()){
+                step_tracker++;
+            }else{
+                step_tracker--;
+            }
         }
     
 };

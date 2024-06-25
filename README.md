@@ -27,6 +27,10 @@ int main(){
 
     Scheduler motor_scheduler;
     TB67S128FTG md1(0, 1, 2, 3, 4, 5);
+    TB67S128FTG md2(6, 7, 8, 9, 10, 11);
+    TB67S128FTG md3(12, 13, 14, 15, 17, 16);
+
+
 
     vector<Task> task_list;
     
@@ -74,4 +78,3 @@ All kinds of feedback and contributions are welcome.
     - scheduler class defined to run tasks until each are completed for sequential task operation 
     - utility functions for creating tasks for specific use cases
         - create_stepper_task()
-

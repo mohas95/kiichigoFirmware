@@ -84,7 +84,7 @@ class Scheduler {
 
 };
 
-// Utility Functiongs
+// Utility Functions
 // This section is for functions specifically for generating specific tasks for special cases
 
 Task create_stepper_task(StepperMotor& stepper_motor, float speed, int steps, bool direction, unsigned int step_mode = 1){
