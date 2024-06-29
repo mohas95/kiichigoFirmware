@@ -41,6 +41,10 @@ class Scheduler {
             task_list.push_back(task);
         }
 
+        void add_background_task(Task& task){
+            background_tasks.push_back(task);
+        }
+
         void run(){
 
             bool allDone;
@@ -57,6 +61,8 @@ class Scheduler {
                 allDone = true;
 
                 now = get_absolute_time();
+
+                run_background(now);
 
                 for (Task& task:task_list){
 
@@ -79,8 +85,51 @@ class Scheduler {
 
         }
 
+        void run_background(absolute_time_t now){
+
+            for (Task& task:background_tasks){
+                    if (task.status){
+                        if(absolute_time_diff_us(task.lastRunTime,now)>=task.interval){
+                            task.execute();
+                            task.lastRunTime=now;
+                        }
+                    }
+                }
+
+        }
+
+        void begin(){
+
+            for(Task& task : background_tasks){
+                if (task.status){
+                    task.begin();
+                }
+            }
+
+        }
+
+        void loop(){
+
+            absolute_time_t now;
+
+            begin();
+
+            while(true){
+
+                now = get_absolute_time();
+                run_background(now);
+                sleep_us(10);
+
+                if(!task_list.empty()){
+                    run();
+                }
+            }
+        }
+
     private:
         vector<reference_wrapper<Task>> task_list;
+        vector<reference_wrapper<Task>> background_tasks;
+
 
 };
 

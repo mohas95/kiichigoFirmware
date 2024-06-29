@@ -43,11 +43,12 @@ Task monitor_steppers_task(vector<StepperMotor*> motor_list){
 }
 
 
-
 unsigned int working_stepModes[4] = {1,4,32,128};
  
 int main(){
     vector<Task> task_list;
+    vector<Task> background_tasks;
+
     vector<StepperMotor*> stepper_list;
 
     stdio_init_all();
@@ -86,16 +87,20 @@ int main(){
     task_list.push_back(create_stepper_task(stepper1, 90, 800, true));
     task_list.push_back(create_stepper_task(stepper2, 90, 1600,false));
     task_list.push_back(create_stepper_task(stepper3, 90, 20000, true));
-    task_list.push_back(monitor_steppers_task(stepper_list));
-
-
 
     for (Task& task: task_list){
 
         motor_scheduler.add_task(task);
     }
 
+    background_tasks.push_back(monitor_steppers_task(stepper_list));
 
+    for (Task& task: background_tasks){
+
+        motor_scheduler.add_background_task(task);
+    }
+
+    motor_scheduler.begin();
     motor_scheduler.run();
 
     // task_list.push_back(create_stepper_task(stepper1, true));
