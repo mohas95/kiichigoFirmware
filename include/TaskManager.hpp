@@ -195,6 +195,30 @@ Task create_stepper_task(StepperMotor& stepper_motor, bool stby_mode){
     return task;
 }
 
+Task STEPPER_MONITOR(vector<StepperMotor*> motor_list){
 
+    auto func = [motor_list](){
+        bool status = true;
+
+        string out = "";
+
+        for (StepperMotor* motor : motor_list){
+            string motor_out= to_string(motor->get_step_tracker());
+            if (!out.empty()){
+                out +=",";
+            }
+
+            out+=motor_out;
+        } 
+
+        printf("%s\n", out.c_str());
+
+        return status;
+    };
+    
+    Task task(func,nullptr,1000000);
+
+    return task;
+}
 
 #endif

@@ -9,40 +9,6 @@
 
 using namespace std;
 
-
-Task monitor_steppers_task(vector<StepperMotor*> motor_list){
-    // this is passing a preset setup function for the test, so that i can store the task
-    // auto setup_func = [&stepper_motor, stby_mode](){
-    //     stepper_motor.action(stby_mode);
-
-    //     return stepper_motor.get_delay_per_pulse();
-    // };
-
-    auto func = [motor_list](){
-        bool status = true;
-
-        string out = "";
-
-        for (StepperMotor* motor : motor_list){
-            string motor_out= to_string(motor->get_step_tracker());
-            if (!out.empty()){
-                out +=",";
-            }
-
-            out+=motor_out;
-        } 
-
-        printf("%s\n", out.c_str());
-
-        return status;
-    };
-    
-    Task task(func,nullptr,1000000);
-
-    return task;
-}
-
-
 unsigned int working_stepModes[4] = {1,4,32,128};
  
 int main(){
@@ -91,8 +57,6 @@ int main(){
     task_list3.push_back(create_stepper_task(stepper2, true));
     task_list3.push_back(create_stepper_task(stepper3, true));
 
-    
-
     // for (Task& task: task_list){
 
     //     motor_scheduler.add_task(task);
@@ -103,11 +67,9 @@ int main(){
     motor_scheduler.add_to_queue(task_list3);
 
 
-
-    background_tasks.push_back(monitor_steppers_task(stepper_list));
+    background_tasks.push_back(STEPPER_MONITOR(stepper_list));
 
     for (Task& task: background_tasks){
-
         motor_scheduler.add_background_task(task);
     }
 
@@ -115,17 +77,6 @@ int main(){
     // motor_scheduler.run();
 
     motor_scheduler.loop();
-
-    // task_list.push_back(create_stepper_task(stepper1, true));
-    // task_list.push_back(create_stepper_task(stepper2, true));
-    // task_list.push_back(create_stepper_task(stepper3, true));
-
-    // for (Task& task: task_list){
-
-    //     motor_scheduler.add_task(task);
-    // }
-
-    // motor_scheduler.run();
 
     printf("Done!\n");
 
