@@ -46,7 +46,11 @@ Task monitor_steppers_task(vector<StepperMotor*> motor_list){
 unsigned int working_stepModes[4] = {1,4,32,128};
  
 int main(){
-    vector<Task> task_list;
+    vector<Task> task_list1;
+    vector<Task> task_list2;
+    vector<Task> task_list3;
+
+
     vector<Task> background_tasks;
 
     vector<StepperMotor*> stepper_list;
@@ -75,23 +79,30 @@ int main(){
     stepper_list.push_back(&stepper3);
 
 
-    // task_list.push_back(create_stepper_task(stepper1, 90, 800, true, 1));
-    // task_list.push_back(create_stepper_task(stepper2, 90, 800*4, true, 4));
-    // task_list.push_back(create_stepper_task(stepper3, 90, 800*32, true, 32));
-    // task_list.push_back(create_stepper_task(stepper1, 90, 800*128, true, 128));
-    // task_list.push_back(create_stepper_task(stepper1, true));
-    // task_list.push_back(create_stepper_task(stepper2, 50, 800*4, false, 4));
-    // task_list.push_back(create_stepper_task(stepper3, 50, 800*4, true, 4));
-    // task_list.push_back(create_stepper_task(stepper2, true));
+    task_list1.push_back(create_stepper_task(stepper1, 90, 800, true));
+    task_list1.push_back(create_stepper_task(stepper2, 90, 1600,false));
+    task_list1.push_back(create_stepper_task(stepper3, 90, 20000, true));
 
-    task_list.push_back(create_stepper_task(stepper1, 90, 800, true));
-    task_list.push_back(create_stepper_task(stepper2, 90, 1600,false));
-    task_list.push_back(create_stepper_task(stepper3, 90, 20000, true));
+    task_list2.push_back(create_stepper_task(stepper1, 90, 800, false));
+    task_list2.push_back(create_stepper_task(stepper2, 90, 1600,true));
+    task_list2.push_back(create_stepper_task(stepper3, 90, 20000, false));
 
-    for (Task& task: task_list){
+    task_list3.push_back(create_stepper_task(stepper1, true));
+    task_list3.push_back(create_stepper_task(stepper2, true));
+    task_list3.push_back(create_stepper_task(stepper3, true));
 
-        motor_scheduler.add_task(task);
-    }
+    
+
+    // for (Task& task: task_list){
+
+    //     motor_scheduler.add_task(task);
+    // }
+
+    motor_scheduler.add_to_queue(task_list1);
+    motor_scheduler.add_to_queue(task_list2);
+    motor_scheduler.add_to_queue(task_list3);
+
+
 
     background_tasks.push_back(monitor_steppers_task(stepper_list));
 
@@ -100,8 +111,10 @@ int main(){
         motor_scheduler.add_background_task(task);
     }
 
-    motor_scheduler.begin();
-    motor_scheduler.run();
+    // motor_scheduler.begin();
+    // motor_scheduler.run();
+
+    motor_scheduler.loop();
 
     // task_list.push_back(create_stepper_task(stepper1, true));
     // task_list.push_back(create_stepper_task(stepper2, true));
@@ -115,7 +128,6 @@ int main(){
     // motor_scheduler.run();
 
     printf("Done!\n");
-
 
 
     

@@ -45,6 +45,12 @@ class Scheduler {
             background_tasks.push_back(task);
         }
 
+        void add_to_queue(vector<Task>& task_list){
+
+            queue.push_back(task_list);
+            
+        }
+
         void run(){
 
             bool allDone;
@@ -119,9 +125,11 @@ class Scheduler {
                 now = get_absolute_time();
                 run_background(now);
                 sleep_us(10);
-
+                
                 if(!task_list.empty()){
                     run();
+                }else{
+                    load_queue();
                 }
             }
         }
@@ -129,6 +137,21 @@ class Scheduler {
     private:
         vector<reference_wrapper<Task>> task_list;
         vector<reference_wrapper<Task>> background_tasks;
+        vector<reference_wrapper<vector<Task>>> queue;
+
+        void load_queue(){
+            if(!queue.empty()){
+
+                vector<Task>& new_list = queue[0];
+
+                for(Task& task:  new_list){
+                    add_task(task);
+                }
+
+                queue.erase(queue.begin());
+            }
+
+        }
 
 
 };
