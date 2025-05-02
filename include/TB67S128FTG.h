@@ -3,32 +3,15 @@
 
 #include "StepperDriver.h"
 #include <array>
+#include <cstdint>
+
+
 
 
 
 class TB67S128FTG : public StepperDriver{
     public:
-        // Step modes defined as public static constexpr arrays
-        // static constexpr std::array<bool, 3> FULL_STEP = {false, false, false};
-        // static constexpr std::array<bool, 3> HALF_STEP = {false, false, true};
-        // static constexpr std::array<bool, 3> QUARTER_STEP = {false, true, false};
-        // static constexpr std::array<bool, 3> ONE_8_STEP = {false, true, true};
-        // static constexpr std::array<bool, 3> ONE_16_STEP = {true, false, false};
-        // static constexpr std::array<bool, 3> ONE_32_STEP = {true, false, true};
-        // static constexpr std::array<bool, 3> ONE_64_STEP = {true, true, false};
-        // static constexpr std::array<bool, 3> ONE_128_STEP = {true, true, true};
 
-        enum class StepMode : uint8_t {
-            FULL,
-            HALF,
-            QUARTER,
-            ONE_8,
-            ONE_16,
-            ONE_32,
-            ONE_64,
-            ONE_128
-        };
-        
         static constexpr std::array<std::array<bool, 3>, 8> STEP_MODE_BITS = {{
             {false, false, false},  // FULL
             {false, false, true},   // HALF
@@ -40,19 +23,27 @@ class TB67S128FTG : public StepperDriver{
             {true, true, true}      // ONE_128
         }};
 
-        TB67S128FTG(unsigned int dirPin,
-                    unsigned int stepPin,
-                    unsigned int stbyPin,
-                    unsigned int mode0Pin,
-                    unsigned int mode1Pin,
-                    unsigned int mode2Pin,
-                    const std::array<bool,3>& step_mode = FULL_STEP
+        TB67S128FTG(uint8_t dirPin,
+                    uint8_t stepPin,
+                    uint8_t stbyPin,
+                    uint8_t mode0Pin,
+                    uint8_t mode1Pin,
+                    uint8_t mode2Pin,
+                    StepMode step_mode = StepMode::FULL
                     );
+        
+        void set_standbyMode(bool active) override;
+        void set_stepMode(StepMode step_mode) override;
+        void set_direction(bool direction) override;
+        void step_pulse() override;
+
         
 
 
     private:
-        unsigned int dirPin_, stepPin_, stbyPin_, mode0Pin_, mode1Pin_, mode2Pin_;
+        uint8_t dirPin_, stepPin_, stbyPin_, mode0Pin_, mode1Pin_, mode2Pin_;
+        bool stby_state_, dir_state_;
+        StepMode current_stepMode_;
 };
 
 
