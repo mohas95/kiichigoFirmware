@@ -72,7 +72,7 @@ void TB67S128FTG::start_pulse(){
     uint64_t time_now = time_us_64(); 
     uint64_t time_diff = time_now-end_time_us_;
 
-    if( !pulse_state_ && time_diff>=min_pulse_width){
+    if( !pulse_state_ && time_diff>=min_pulse_width_){
         gpio_put(stepPin_, true);
         start_time_us_ = time_now;
         pulse_state_=true;
@@ -84,7 +84,7 @@ void TB67S128FTG::update_pulse(){
     uint64_t time_now = time_us_64(); 
     uint64_t time_diff = time_now-start_time_us_;
 
-    if( pulse_state_ && time_diff>=min_pulse_width){
+    if( pulse_state_ && time_diff>=min_pulse_width_){
         gpio_put(stepPin_, false);
         end_time_us_=time_now;
         pulse_state_=false;
