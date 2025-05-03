@@ -1,5 +1,7 @@
 #include "TB67S128FTG.h"
 #include "Log.h"
+#include "pico/time.h"
+
 
 
 TB67S128FTG::TB67S128FTG (uint8_t dirPin,
@@ -27,13 +29,18 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
 
     // Set default states
     set_stepMode(step_mode);
+    set_standbyMode(false);
+    set_direction(true);  
+
 }
 
 void TB67S128FTG::set_standbyMode(bool active){
     if(stby_state_!=active){
+        gpio_put(stbyPin_, !active);
         stby_state_ = active;
-        gpio_put(stbyPin_, !stby_state_);
     }
+
+    LOG_INFO("standby mode is: %s", active ? "Enabled" : "Disabled");
 }
 
 void TB67S128FTG::set_stepMode(StepMode step_mode){
@@ -44,14 +51,43 @@ void TB67S128FTG::set_stepMode(StepMode step_mode){
     gpio_put(mode2Pin_, modeBits[2]);
 
     current_stepMode_ = step_mode;
-    LOG_INFO("stepMode set\n");
-
+    LOG_INFO("Mode Pins set to 0: %s, 1: %s, 2: %s\n",
+         modeBits[0] ? "true" : "false",
+         modeBits[1] ? "true" : "false",
+         modeBits[2] ? "true" : "false");
 }
 
-void TB67S128FTG::set_direction(bool direction){
+void TB67S128FTG::set_direction(bool direction){    
+   
+    if(dir_state_!=direction){
+        gpio_put(dirPin_, direction);
+        dir_state_ = direction;
+    }
 
+    LOG_INFO("direction set to: %s", direction ? "CW" : "CCW");
 }
 
-void TB67S128FTG::step_pulse(){
+void TB67S128FTG::start_pulse(){
 
+    uint64_t time_now = time_us_64(); 
+    uint64_t time_diff = time_now-end_time_us_;
+
+    if( !pulse_state_ && time_diff>=min_pulse_width){
+        gpio_put(stepPin_, true);
+        start_time_us_ = time_now;
+        pulse_state_=true;
+    }
+    
+}
+
+void TB67S128FTG::update_pulse(){
+    uint64_t time_now = time_us_64(); 
+    uint64_t time_diff = time_now-start_time_us_;
+
+    if( pulse_state_ && time_diff>=min_pulse_width){
+        gpio_put(stepPin_, false);
+        end_time_us_=time_now;
+        pulse_state_=false;
+    }
+    
 }

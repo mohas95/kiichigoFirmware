@@ -37,13 +37,21 @@ class TB67S128FTG : public StepperDriver{
         void set_direction(bool direction) override;
         void step_pulse() override;
 
+
+
         
 
 
     private:
         uint8_t dirPin_, stepPin_, stbyPin_, mode0Pin_, mode1Pin_, mode2Pin_;
-        bool stby_state_, dir_state_;
+        bool pulse_state_, stby_state_, dir_state_;
+        uint64_t start_time_us_, end_time_us_;
+        uint32_t min_pulse_width_; 
         StepMode current_stepMode_;
+
+        void start_pulse() override;
+        void update_pulse() override;
+
 };
 
 

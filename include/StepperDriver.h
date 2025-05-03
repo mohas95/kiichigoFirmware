@@ -24,6 +24,12 @@ class StepperDriver {
         // virtual void standby_mode(bool) = 0;
         virtual ~StepperDriver(){};
 
+    private:
+
+        virtual void start_pulse() = 0;
+        virtual void update_pulse() = 0;
+
+
 };
 
 

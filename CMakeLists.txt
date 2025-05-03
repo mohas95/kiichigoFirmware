@@ -37,10 +37,14 @@ pico_sdk_init()
 ## Rest of the project
 
 # header files
-include_directories(include)
+# include_directories(include) #out dated style
 
 # Add executable. Default name is the project name, version 0.1
-add_executable(${PROJECT_NAME} src/kiichigoFirmware.cpp )
+add_executable( ${PROJECT_NAME} 
+            src/kiichigoFirmware.cpp 
+            src/Log.cpp
+            src/StepperDriver.cpp
+            src/TB67S128FTG.cpp )
 
 pico_set_program_name(${PROJECT_NAME} "kiichigoFirmware")
 pico_set_program_version(${PROJECT_NAME} "0.1")
@@ -55,8 +59,10 @@ target_link_libraries(${PROJECT_NAME}
 
 # Add the standard include files to the build
 target_include_directories(${PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
-)
+        ${CMAKE_CURRENT_LIST_DIR} #root
+        ${CMAKE_CURRENT_LIST_DIR}/include #/include
+
+) #new style
 
 # Add any user requested libraries
 target_link_libraries(${PROJECT_NAME} 
