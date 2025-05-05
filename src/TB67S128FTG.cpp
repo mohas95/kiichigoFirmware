@@ -97,3 +97,11 @@ void TB67S128FTG::pulse_low(){
     }
     
 }
+
+void TB67S128FTG::step_pulse(){
+
+    pulse_high();
+
+    pulse_low();
+    
+}

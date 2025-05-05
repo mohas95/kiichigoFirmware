@@ -16,7 +16,7 @@ class StepperDriver {
             ONE_128
         };
 
-        // virtual void step_pulse() = 0;
+        virtual void step_pulse() = 0;
         virtual void pulse_high() = 0;
         virtual void pulse_low() = 0;
 
