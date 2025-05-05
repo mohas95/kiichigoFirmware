@@ -10,13 +10,15 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
                           uint8_t mode0Pin,
                           uint8_t mode1Pin,
                           uint8_t mode2Pin,
-                          StepMode step_mode) 
+                          StepMode step_mode,
+                          uint32_t pulse_width) 
                           : dirPin_(dirPin),
                             stepPin_(stepPin),
                             stbyPin_(stbyPin),
                             mode0Pin_(mode0Pin),
                             mode1Pin_(mode1Pin),
-                            mode2Pin_(mode2Pin)
+                            mode2Pin_(mode2Pin),
+                            min_pulse_width_(pulse_width)
                             {
 
     // Initialize Pins and set to output 
@@ -27,6 +29,10 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
     gpio_init(mode1Pin_); gpio_set_dir(mode1Pin_, GPIO_OUT);
     gpio_init(mode2Pin_); gpio_set_dir(mode2Pin_, GPIO_OUT);
 
+    // Initialize values;
+    start_time_us_ = 0;
+    end_time_us_ = 0;
+    
     // Set default states
     set_stepMode(step_mode);
     set_standbyMode(false);
@@ -67,7 +73,7 @@ void TB67S128FTG::set_direction(bool direction){
     LOG_INFO("direction set to: %s", direction ? "CW" : "CCW");
 }
 
-void TB67S128FTG::start_pulse(){
+void TB67S128FTG::pulse_high(){
 
     uint64_t time_now = time_us_64(); 
     uint64_t time_diff = time_now-end_time_us_;
@@ -80,7 +86,7 @@ void TB67S128FTG::start_pulse(){
     
 }
 
-void TB67S128FTG::update_pulse(){
+void TB67S128FTG::pulse_low(){
     uint64_t time_now = time_us_64(); 
     uint64_t time_diff = time_now-start_time_us_;
 

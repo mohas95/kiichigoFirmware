@@ -5,10 +5,6 @@
 #include <array>
 #include <cstdint>
 
-
-
-
-
 class TB67S128FTG : public StepperDriver{
     public:
 
@@ -29,28 +25,23 @@ class TB67S128FTG : public StepperDriver{
                     uint8_t mode0Pin,
                     uint8_t mode1Pin,
                     uint8_t mode2Pin,
-                    StepMode step_mode = StepMode::FULL
+                    StepMode step_mode = StepMode::FULL,
+                    uint32_t pulse_width=2;
                     );
         
         void set_standbyMode(bool active) override;
         void set_stepMode(StepMode step_mode) override;
         void set_direction(bool direction) override;
         void step_pulse() override;
-
-
-
-        
-
+        void pulse_high() override;
+        void pulse_low() override;
 
     private:
         uint8_t dirPin_, stepPin_, stbyPin_, mode0Pin_, mode1Pin_, mode2Pin_;
         bool pulse_state_, stby_state_, dir_state_;
         uint64_t start_time_us_, end_time_us_;
-        uint32_t min_pulse_width_; 
+        uint32_t min_pulse_width_; // in microseconds 
         StepMode current_stepMode_;
-
-        void start_pulse() override;
-        void update_pulse() override;
 
 };
 

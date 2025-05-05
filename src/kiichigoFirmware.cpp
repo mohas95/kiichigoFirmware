@@ -8,10 +8,12 @@ int main()
 {
     stdio_init_all();
 
-    // while (true) {
-    //     printf("Hello, world!\n");
-    //     sleep_ms(1000);
-    // }
+    TB67S128FTG md1(0, 1, 2, 3, 4, 5);
+
+    while (true) {
+        printf("Hello, world!\n");
+        sleep_ms(1000);
+    }
 
     return 0;
 }
