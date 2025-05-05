@@ -4,6 +4,14 @@
 #include "Log.h"
 #include "TB67S128FTG.h"
 
+
+void step(){
+
+
+    
+}
+
+
 int main()
 {
     stdio_init_all();
