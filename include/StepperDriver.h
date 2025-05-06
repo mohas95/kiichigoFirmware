@@ -17,8 +17,13 @@ class StepperDriver {
         };
 
         virtual void step_pulse() = 0;
-        virtual void pulse_high() = 0;
-        virtual void pulse_low() = 0;
+        virtual void set_pulse_interval(uint32_t) = 0;
+        virtual void set_pulse_width(uint8_t) = 0;
+        virtual void step_for(uint32_t) = 0;
+
+
+        // virtual void pulse_high() = 0;
+        // virtual void pulse_low() = 0;
 
         virtual void set_stepMode(StepMode) = 0;
         virtual void set_standbyMode(bool) = 0;

@@ -11,40 +11,44 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
                           uint8_t mode1Pin,
                           uint8_t mode2Pin,
                           StepMode step_mode,
-                          uint32_t pulse_width) 
+                          uint8_t default_pulse_width,
+                          uint32_t default_pulse_interval)
                           : dirPin_(dirPin),
                             stepPin_(stepPin),
                             stbyPin_(stbyPin),
                             mode0Pin_(mode0Pin),
                             mode1Pin_(mode1Pin),
                             mode2Pin_(mode2Pin),
-                            min_pulse_width_(pulse_width)
+                            pulse_width_(default_pulse_width),
+                            pulse_interval_(default_pulse_interval)
                             {
 
     // Initialize Pins and set to output 
-    gpio_init(dirPin_); gpio_set_dir(dirPin_, GPIO_OUT);
+    gpio_init(dirPin_); gpio_set_dir(dirPin_, GPIO_OUT); gpio_put(dirPin_, true);
     gpio_init(stepPin_); gpio_set_dir(stepPin_, GPIO_OUT);
-    gpio_init(stbyPin_); gpio_set_dir(stbyPin_, GPIO_OUT);
+    gpio_init(stbyPin_); gpio_set_dir(stbyPin_, GPIO_OUT); gpio_put(stbyPin_, true);
     gpio_init(mode0Pin_); gpio_set_dir(mode0Pin_, GPIO_OUT);
     gpio_init(mode1Pin_); gpio_set_dir(mode1Pin_, GPIO_OUT);
     gpio_init(mode2Pin_); gpio_set_dir(mode2Pin_, GPIO_OUT);
 
     // Initialize values;
-    start_time_us_ = 0;
-    end_time_us_ = 0;
+    last_time_update_us_ = time_us_64();
+
     
     // Set default states
     set_stepMode(step_mode);
     set_standbyMode(false);
-    set_direction(true);  
+    set_direction(true);
 
 }
 
 void TB67S128FTG::set_standbyMode(bool active){
-    if(stby_state_!=active){
-        gpio_put(stbyPin_, !active);
-        stby_state_ = active;
-    }
+    gpio_put(stbyPin_, !active);
+    stby_state_ = active;
+    // if(stby_state_!=active){
+    //     gpio_put(stbyPin_, !active);
+    //     stby_state_ = active;
+    // }
 
     LOG_INFO("standby mode is: %s", active ? "Enabled" : "Disabled");
 }
@@ -65,43 +69,53 @@ void TB67S128FTG::set_stepMode(StepMode step_mode){
 
 void TB67S128FTG::set_direction(bool direction){    
    
-    if(dir_state_!=direction){
-        gpio_put(dirPin_, direction);
-        dir_state_ = direction;
-    }
+    // if(dir_state_!=direction){
+    //     gpio_put(dirPin_, direction);
+    //     dir_state_ = direction;
+    // }
+
+    gpio_put(dirPin_, direction);
+    dir_state_ = direction;
 
     LOG_INFO("direction set to: %s", direction ? "CW" : "CCW");
 }
 
-void TB67S128FTG::pulse_high(){
 
-    uint64_t time_now = time_us_64(); 
-    uint64_t time_diff = time_now-end_time_us_;
-
-    if( !pulse_state_ && time_diff>=min_pulse_width_){
-        gpio_put(stepPin_, true);
-        start_time_us_ = time_now;
-        pulse_state_=true;
-    }
-    
+void TB67S128FTG::set_pulse_interval(uint32_t pulse_interval){
+    pulse_interval_=pulse_interval;
 }
 
-void TB67S128FTG::pulse_low(){
-    uint64_t time_now = time_us_64(); 
-    uint64_t time_diff = time_now-start_time_us_;
+void TB67S128FTG::set_pulse_width(uint8_t pulse_width){
+    pulse_width_=pulse_width;
+}
 
-    if( pulse_state_ && time_diff>=min_pulse_width_){
-        gpio_put(stepPin_, false);
-        end_time_us_=time_now;
-        pulse_state_=false;
-    }
-    
+void TB67S128FTG::step_for(uint32_t steps){
+    steps_+=steps;
 }
 
 void TB67S128FTG::step_pulse(){
 
-    pulse_high();
+    uint64_t time_now = time_us_64();
+    uint64_t time_diff = time_now-last_time_update_us_;
 
-    pulse_low();
-    
+    if(steps_>0){
+
+        if (pulse_state_ && time_diff>=pulse_width_){
+            pulse_state_ = false;
+            gpio_put(stepPin_, false);
+            last_time_update_us_ = time_now;
+            steps_--;
+            LOG_DEBUG("Pulse Remaining: %d\n", steps_);
+            // LOG_DEBUG("Pulse: %s | Remaining: %d\n", pulse_state_ ? "HIGH" : "LOW", steps_);
+
+            
+        }else if (!pulse_state_ && time_diff>=pulse_interval_){
+            pulse_state_ = true;
+            gpio_put(stepPin_, true);
+            last_time_update_us_ = time_now;
+
+        }
+        
+    }
+   
 }

@@ -3,25 +3,25 @@
 
 #include "Log.h"
 #include "TB67S128FTG.h"
-#include "Scheduler.h"
+// #include "Scheduler.h"
 
 
-void step(){
-
-
-    
-}
-
+uint32_t step_freq = 500;
 
 int main()
 {
     stdio_init_all();
 
-    TB67S128FTG md1(0, 1, 2, 3, 4, 5);
+    TB67S128FTG stepper1(0, 1, 2, 3, 4, 5);
+
+    stepper1.set_pulse_interval(5000);
+    stepper1.step_for(1000);
+
 
     while (true) {
-        printf("Hello, world!\n");
-        sleep_ms(1000);
+
+        stepper1.step_pulse();
+
     }
 
     return 0;

@@ -26,22 +26,32 @@ class TB67S128FTG : public StepperDriver{
                     uint8_t mode1Pin,
                     uint8_t mode2Pin,
                     StepMode step_mode = StepMode::FULL,
-                    uint32_t pulse_width=2;
+                    uint8_t default_pulse_width=5,
+                    uint32_t default_pulse_interval=500000
                     );
         
         void set_standbyMode(bool active) override;
         void set_stepMode(StepMode step_mode) override;
         void set_direction(bool direction) override;
+        
+        void set_pulse_interval(uint32_t pulse_interval) override;
+        void set_pulse_width(uint8_t pulse_width) override;
+        void step_for(uint32_t steps) override;
+        
+
+
         void step_pulse() override;
-        void pulse_high() override;
-        void pulse_low() override;
+
+
 
     private:
         uint8_t dirPin_, stepPin_, stbyPin_, mode0Pin_, mode1Pin_, mode2Pin_;
-        bool pulse_state_, stby_state_, dir_state_;
-        uint64_t start_time_us_, end_time_us_;
-        uint32_t min_pulse_width_; // in microseconds 
+        bool pulse_state_=false, stby_state_, dir_state_;
+        uint64_t last_time_update_us_;
+        uint8_t pulse_width_; // in microseconds
+        uint32_t pulse_interval_; // in microseconds
         StepMode current_stepMode_;
+        uint32_t steps_=0;
 
 };
 
