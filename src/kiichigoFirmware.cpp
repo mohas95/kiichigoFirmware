@@ -13,6 +13,14 @@ int main()
 {
     stdio_init_all();
 
+    // Wait for USB serial to be connected
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+
+    // Print a message to the USB serial
+    printf("USB Serial connected!\n");
+
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5);
 
     // stepper_driver1.set_pulse_interval(5000);
