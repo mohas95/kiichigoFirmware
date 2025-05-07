@@ -19,12 +19,8 @@ int main()
     printf("USB Serial connected!\n");
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
-
-    // stepper_driver1.set_pulse_interval(5000); 
-
     StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
 
-    // stepper1.step_for(1000);
     stepper1.revolve(-5);
 
     while (stepper1.active()) {
