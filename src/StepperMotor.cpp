@@ -63,11 +63,14 @@ void StepperMotor::home(){
     driver_.home();
     update_position();
 
-    // LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
+    LOG_DEBUG("%s HOME HIT! Position reset to: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
+
 }
 
 void StepperMotor::set_standbyMode(bool active){
     driver_.set_standbyMode(active);
+    LOG_DEBUG("%s Standby Mode %s", label_, active ?"enabled":"disabled");   
+
 }
 
 bool StepperMotor::active(){
