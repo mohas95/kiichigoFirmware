@@ -25,7 +25,7 @@ int main()
 
     // stepper_driver1.set_pulse_interval(5000);
 
-    StepperMotor stepper1("x-axis", stepper_driver1, 200, 200);
+    StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
 
     // stepper1.step_for(1000);
     stepper1.revolve(5);
