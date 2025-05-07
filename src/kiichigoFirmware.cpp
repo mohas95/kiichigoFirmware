@@ -21,7 +21,7 @@ int main()
     // Print a message to the USB serial
     printf("USB Serial connected!\n");
 
-    TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5);
+    TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
 
     // stepper_driver1.set_pulse_interval(5000);
 

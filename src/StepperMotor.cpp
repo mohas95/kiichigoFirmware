@@ -11,11 +11,11 @@ StepperMotor::StepperMotor (const char* label,
                             driver_(driver)
                             {
     //Set default values 
-    set_speed(default_speed);
 
     StepperDriver::StepMode step_mode = driver_.get_stepMode();
     auto modeMultiplier = STEP_MODE_MULTIPLIER[static_cast<size_t>(step_mode)];
     steps_per_rev_ = steps_per_rev*modeMultiplier;
+    set_speed(default_speed);
 
     LOG_DEBUG("%s Defaults set\n steps per revolution: %d\n", label_, steps_per_rev_);
 
