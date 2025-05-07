@@ -31,6 +31,7 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
 
     // Initialize values;
     last_time_update_us_ = time_us_64();
+    step_tracker_=0;
 
     
     // Set default states
@@ -100,7 +101,7 @@ void TB67S128FTG::step_for(uint32_t steps){
     steps_=steps;
 }
 
-void TB67S128FTG::step_pulse(){
+bool TB67S128FTG::step_pulse(){
 
     uint64_t time_now = time_us_64();
     uint64_t time_diff = time_now-last_time_update_us_;
@@ -112,6 +113,13 @@ void TB67S128FTG::step_pulse(){
             gpio_put(stepPin_, false);
             last_time_update_us_ = time_now;
             steps_--;
+
+            if(dir_state_){
+                step_tracker_++;
+            } else if (!dir_state_){
+                step_tracker_--;
+            }
+            
             // LOG_DEBUG("Pulse Remaining: %d\n", steps_);
             // LOG_DEBUG("Pulse: %s | Remaining: %d\n", pulse_state_ ? "HIGH" : "LOW", steps_);
 
@@ -122,7 +130,24 @@ void TB67S128FTG::step_pulse(){
             last_time_update_us_ = time_now;
 
         }
+
+        return true;
         
     }
+
+    return false;
    
+}
+
+void TB67S128FTG::home(){
+    step_tracker_ = 0;
+}
+
+int32_t TB67S128FTG::get_step_tracker(){
+    return step_tracker_;
+}
+
+bool TB67S128FTG::active(){
+
+    return steps_ > 0 ? true:false; 
 }

@@ -25,12 +25,19 @@ class StepperMotor {
 
         void revolve(int32_t revolutions=1);
         void set_speed(uint32_t rpm=200);
+        void home();
+        void update_position();
+        bool step();
+        void set_standbyMode(bool);
+        bool active();
 
     private:
         const char* label_;
-        uint32_t steps_per_rev_;
-        uint32_t speed_;
+        uint32_t steps_per_rev_, speed_;
         StepperDriver& driver_;
+        int32_t position_step_;
+        double position_revolutions_;
+
 };
 
 
