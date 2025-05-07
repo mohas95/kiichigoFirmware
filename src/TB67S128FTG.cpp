@@ -2,8 +2,6 @@
 #include "Log.h"
 #include "pico/time.h"
 
-
-
 TB67S128FTG::TB67S128FTG (uint8_t dirPin,
                           uint8_t stepPin,
                           uint8_t stbyPin,
@@ -45,10 +43,6 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
 void TB67S128FTG::set_standbyMode(bool active){
     gpio_put(stbyPin_, !active);
     stby_state_ = active;
-    // if(stby_state_!=active){
-    //     gpio_put(stbyPin_, !active);
-    //     stby_state_ = active;
-    // }
 
     LOG_INFO("standby mode is: %s", active ? "Enabled" : "Disabled");
 }
@@ -68,11 +62,6 @@ void TB67S128FTG::set_stepMode(StepMode step_mode){
 }
 
 void TB67S128FTG::set_direction(bool direction){    
-   
-    // if(dir_state_!=direction){
-    //     gpio_put(dirPin_, direction);
-    //     dir_state_ = direction;
-    // }
 
     gpio_put(dirPin_, direction);
     dir_state_ = direction;

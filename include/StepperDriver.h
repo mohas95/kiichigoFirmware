@@ -1,6 +1,7 @@
 #ifndef StepperDriver_H
 #define StepperDriver_H
 
+#include <cstdint>
 #include "pico/stdlib.h"
 
 class StepperDriver {
@@ -21,14 +22,9 @@ class StepperDriver {
         virtual void set_pulse_width(uint8_t) = 0;
         virtual void step_for(uint32_t) = 0;
 
-
-        // virtual void pulse_high() = 0;
-        // virtual void pulse_low() = 0;
-
         virtual void set_stepMode(StepMode) = 0;
         virtual void set_standbyMode(bool) = 0;
         virtual void set_direction(bool) = 0;
-        // virtual void standby_mode(bool) = 0;
         virtual ~StepperDriver(){};
 
     private:
