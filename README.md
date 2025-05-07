@@ -28,13 +28,16 @@ int main()
     // Print a message to the USB serial
     printf("USB Serial connected!\n");
 
-    TB67S128FTG stepper_driver1(0, 
-                                1, 
-                                2, 
-                                3, 
-                                4, 
-                                5, 
-                                StepperDriver::StepMode::HALF);
+    TB67S128FTG stepper_driver1(0, // uint8_t dirPin
+                                1, // uint8_t stepPin
+                                2, // uint8_t stbyPin
+                                3, // uint8_t mode0Pin
+                                4, // uint8_t mode1Pin
+                                5, // uint8_t mode2Pin
+                                StepperDriver::StepMode::HALF, //StepMode step_mode= StepMode::FULL,
+                                5, //uint8_t default_pulse_width=5 microseconds
+                                500000 //uint32_t default_pulse_interval=5000 in microseconds
+                                ); 
 
     stepper_driver1.set_pulse_interval(5000); // sets pulse intervals (speed) in microseconds
     stepper_driver1.step_for(1000); // sets number of steps to take
@@ -67,7 +70,11 @@ int main()
     printf("USB Serial connected!\n");
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
-    StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
+    StepperMotor stepper1( "x-axis", // const char* label
+                            stepper_driver1, //StepperDriver& driver
+                            200, //uint32_t steps_per_rev
+                            100 //uint32_t default_speed=200
+                         );
 
     stepper1.revolve(-5);
 
