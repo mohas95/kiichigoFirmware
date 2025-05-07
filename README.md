@@ -75,7 +75,7 @@ int main()
 
     while (true) {
 
-        stepper_driver1.step_pulse();      
+        stepper1.step(); // tracks positions as well      
 
     }
 
@@ -99,5 +99,5 @@ All kinds of feedback and contributions are welcome.
 - Complete Overhaul of old project, reorganization of project structure.
 - StepperDriver Parent class for blueprint of various stepperdrivers on market.
 - [TB67S128FTG](https://www.pololu.com/product/2998) Motor Driver Support added inherets from StepperDriver.
-- StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control. Dependent on StepperDriver class.
+- StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control, position tracking. Dependent on StepperDriver class. 
 - Logging module added to simplify displaying various levels of messages on Serial Monitor.
