@@ -54,9 +54,9 @@ bool TB67S128FTG::get_standbyMode(){
 void TB67S128FTG::set_stepMode(StepMode step_mode){
     
     auto modeBits = STEP_MODE_BITS[static_cast<size_t>(step_mode)];
-    gpio_put(mode0Pin_, modeBits[0]);
+    gpio_put(mode0Pin_, modeBits[2]);
     gpio_put(mode1Pin_, modeBits[1]);
-    gpio_put(mode2Pin_, modeBits[2]);
+    gpio_put(mode2Pin_, modeBits[0]);
 
     current_stepMode_ = step_mode;
     // LOG_INFO("Mode Pins set to 0: %s, 1: %s, 2: %s\n",
