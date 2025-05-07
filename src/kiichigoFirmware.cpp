@@ -25,12 +25,13 @@ int main()
     StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
 
     // stepper1.step_for(1000);
-    stepper1.revolve(5);
+    stepper1.revolve(-5);
 
 
     while (true) {
 
-        stepper_driver1.step_pulse();      
+        stepper1.step();
+        // stepper_driver1.step_pulse();      
 
     }
 

@@ -53,9 +53,9 @@ void StepperMotor::set_speed(uint32_t rpm){
 
 void StepperMotor::update_position(){
     position_step_ = driver_.get_step_tracker();
-    position_revolutions_ = position_step_/steps_per_rev_;
+    position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);
 
-    LOG_DEBUG("%s Position: %d steps (%d revolutions) \n", label_, position_step_, position_revolutions_);   
+    LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
 }
 
 
