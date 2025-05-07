@@ -28,6 +28,7 @@ class StepperMotor {
         void home();
         void update_position();
         bool step();
+        void set_standbyMode(bool);
         bool active();
 
     private:

@@ -45,6 +45,11 @@ int main()
         stepper1.step();
     }
 
+    stepper1.set_standbyMode(true);
+
+    while (true){
+    }
+
     printf("Done!\n");
 
     return 0;

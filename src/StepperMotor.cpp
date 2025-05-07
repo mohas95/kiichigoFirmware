@@ -66,6 +66,9 @@ void StepperMotor::home(){
     // LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
 }
 
+void StepperMotor::set_standbyMode(bool active){
+    driver_.set_standbyMode(active);
+}
 
 bool StepperMotor::active(){
     return driver_.active();
