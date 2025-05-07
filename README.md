@@ -9,26 +9,15 @@ The goal of this project is to make a stepper motor motion firmware for RP2040-b
 ## Example usage
 ### motor library usage
 
-#### Non-looping operation (run once)
-```cpp
-#include "StepperMotorDriver.hpp"
-#include "Motor.hpp"
-#include "TaskManager.hpp"
+Controlling directly from motor driver
+``` cpp
+#include <stdio.h>
 #include "pico/stdlib.h"
-#include <string>
-#include <memory>
-#include <vector>
-#include <functional>
+#include "TB67S128FTG.h"
 
-using namespace std;
 
-unsigned int working_stepModes[4] = {1,4,32,128};
- 
-int main(){
-    vector<Task> task_list;
-    vector<StepperMotor*> stepper_list;
-    vector<Task> background_tasks;
-
+int main()
+{
     stdio_init_all();
 
     // Wait for USB serial to be connected
@@ -39,67 +28,34 @@ int main(){
     // Print a message to the USB serial
     printf("USB Serial connected!\n");
 
-    Scheduler motor_scheduler;
-    TB67S128FTG md1(0, 1, 2, 3, 4, 5);
-    TB67S128FTG md2(6, 7, 8, 9, 10, 11);
-    TB67S128FTG md3(12, 13, 14, 15, 17, 16);
+    TB67S128FTG stepper_driver1(0, 
+                                1, 
+                                2, 
+                                3, 
+                                4, 
+                                5, 
+                                StepperDriver::StepMode::HALF);
 
-    StepperMotor stepper1(&md1, 200, 1, 180);
-    StepperMotor stepper2(&md2, 200, 1, 180);
-    StepperMotor stepper3(&md3, 200, 1, 180);
+    stepper_driver1.set_pulse_interval(5000); // sets pulse intervals (speed) in microseconds
+    stepper_driver1.step_for(1000); // sets number of steps to take
 
-    stepper_list.push_back(&stepper1);
-    stepper_list.push_back(&stepper2);
-    stepper_list.push_back(&stepper3);
-
-    task_list.push_back(create_stepper_task(stepper1, 90, 800, true));
-    task_list.push_back(create_stepper_task(stepper2, 90, 1600,false));
-    task_list.push_back(create_stepper_task(stepper3, 90, 20000, true));
-    
-    background_tasks.push_back(STEPPER_MONITOR(stepper_list));
-    
-    for (Task& task: background_tasks){
-        motor_scheduler.add_background_task(task);
+    while (true) {
+        stepper_driver1.step_pulse(); //runs pulse process in the event loop for parralelism
     }
-
-    for (Task& task: task_list){
-
-            motor_scheduler.add_task(task);
-        }
-
-    motor_scheduler.begin();
-    motor_scheduler.run();
-
-    printf("Done!\n");
 
     return 0;
-};
+}
 ```
 
-#### Loop operation (continuous operation)
-```cpp
-#include "StepperMotorDriver.hpp"
-#include "Motor.hpp"
-#include "TaskManager.hpp"
+Using the StepperMotor Library for abstracted control
+``` cpp
+#include <stdio.h>
 #include "pico/stdlib.h"
-#include <string>
-#include <memory>
-#include <vector>
-#include <functional>
+#include "TB67S128FTG.h"
+#include "StepperMotor.h"
 
-using namespace std;
-
-unsigned int working_stepModes[4] = {1,4,32,128};
- 
-int main(){
-    vector<Task> task_list1;
-    vector<Task> task_list2;
-    vector<Task> task_list3;
-
-    vector<Task> background_tasks;
-
-    vector<StepperMotor*> stepper_list;
-
+int main()
+{
     stdio_init_all();
 
     // Wait for USB serial to be connected
@@ -110,46 +66,21 @@ int main(){
     // Print a message to the USB serial
     printf("USB Serial connected!\n");
 
-    Scheduler motor_scheduler;
-    TB67S128FTG md1(0, 1, 2, 3, 4, 5);
-    TB67S128FTG md2(6, 7, 8, 9, 10, 11);
-    TB67S128FTG md3(12, 13, 14, 15, 17, 16);
-    
-    StepperMotor stepper1(&md1, 200, 1, 180);
-    StepperMotor stepper2(&md2, 200, 1, 180);
-    StepperMotor stepper3(&md3, 200, 1, 180);
+    TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
 
-    stepper_list.push_back(&stepper1);
-    stepper_list.push_back(&stepper2);
-    stepper_list.push_back(&stepper3);
+    StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
+
+    stepper1.revolve(-5); // five revolutions in the counter clockwise directions
 
 
-    task_list1.push_back(create_stepper_task(stepper1, 90, 800, true));
-    task_list1.push_back(create_stepper_task(stepper2, 90, 1600,false));
-    task_list1.push_back(create_stepper_task(stepper3, 90, 20000, true));
+    while (true) {
 
-    task_list2.push_back(create_stepper_task(stepper1, 90, 800, false));
-    task_list2.push_back(create_stepper_task(stepper2, 90, 1600,true));
-    task_list2.push_back(create_stepper_task(stepper3, 90, 20000, false));
+        stepper_driver1.step_pulse();      
 
-    task_list3.push_back(create_stepper_task(stepper1, true));
-    task_list3.push_back(create_stepper_task(stepper2, true));
-    task_list3.push_back(create_stepper_task(stepper3, true));
-
-    motor_scheduler.add_to_queue(task_list1);
-    motor_scheduler.add_to_queue(task_list2);
-    motor_scheduler.add_to_queue(task_list3);
-
-
-    background_tasks.push_back(STEPPER_MONITOR(stepper_list));
-
-    for (Task& task: background_tasks){
-        motor_scheduler.add_background_task(task);
     }
 
-    
-
-    motor_scheduler.loop();
+    return 0;
+}
 ```
 
 
@@ -165,17 +96,8 @@ All kinds of feedback and contributions are welcome.
 
 ## Change Log
 ### 0.0.1 (Not released yet)
-- initial stepper motor driver library
-    - StepperMotorDriver class/header as virtual parent class with inheritance of specific drivers:
-        - support for TB67S128FTG stepper motor driver added
-    - Motor class/header as virtual parent class with inheritance for specific action based motor interface:
-        - stepper motor interface defined
-- TaskManager Header, created to define multitasking and scheduling interface
-    - Task struct which defines tasks for scheduler class to run simultaneously
-    - scheduler class defined to run tasks until each are completed for sequential task operation 
-    - utility functions for creating tasks for specific use cases
-        - create_stepper_task()
-        - STEPPER_MONITOR() for querying stepper motors
-    - background/daemon tasks for call_back functionality and continuous operations
-    - Queued task handling
-    - loop() which will run the event handling forever.
+- Complete Overhaul of old project, reorganization of project structure.
+- StepperDriver Parent class for blueprint of various stepperdrivers on market.
+- [TB67S128FTG](https://www.pololu.com/product/2998) Motor Driver Support added inherets from StepperDriver.
+- StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control. Dependent on StepperDriver class.
+- Logging module added to simplify displaying various levels of messages on Serial Monitor.
