@@ -70,7 +70,7 @@ int main()
 
     StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
 
-    stepper1.revolve(5);
+    stepper1.revolve(-5); // five revolutions in the counter clockwise directions
 
 
     while (true) {
@@ -82,3 +82,22 @@ int main()
     return 0;
 }
 ```
+
+
+## Feedback
+All kinds of feedback and contributions are welcome.
+- [Create an issue](https://github.com/mohas95/kiichigoFirmware/issues)
+- [Create a pull request](https://github.com/mohas95/kiichigoFirmware/pulls)
+- reach out to @mohas95
+
+## Contributors
+- Mohamed Debbagh
+    - [github](https://github.com/mohas05/), [website](https://mohas95.github.io/)
+
+## Change Log
+### 0.0.1 (Not released yet)
+- Complete Overhaul of old project, reorganization of project structure.
+- StepperDriver Parent class for blueprint of various stepperdrivers on market.
+- [TB67S128FTG](https://www.pololu.com/product/2998) Motor Driver Support added inherets from StepperDriver.
+- StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control. Dependent on StepperDriver class.
+- Logging module added to simplify displaying various levels of messages on Serial Monitor.
