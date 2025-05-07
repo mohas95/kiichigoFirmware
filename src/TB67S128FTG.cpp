@@ -78,6 +78,18 @@ void TB67S128FTG::set_pulse_width(uint8_t pulse_width){
     pulse_width_=pulse_width;
 }
 
+
+uint32_t TB67S128FTG::get_pulse_interval(){
+    return pulse_interval_;
+}
+
+uint8_t TB67S128FTG::get_pulse_width(){
+    return pulse_width_;
+}
+
+
+
+
 void TB67S128FTG::step_for(uint32_t steps){
     steps_+=steps;
 }

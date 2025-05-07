@@ -38,7 +38,8 @@ class TB67S128FTG : public StepperDriver{
         void set_pulse_width(uint8_t pulse_width) override;
         void step_for(uint32_t steps) override;
         
-
+        uint32_t get_pulse_interval() override;
+        uint8_t get_pulse_width() override;
 
         void step_pulse() override;
 
