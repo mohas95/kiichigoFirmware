@@ -3,6 +3,8 @@
 
 #include "StepperDriver.h"
 #include <array>
+#include <tuple>
+
 
 
 class StepperMotor {
@@ -26,7 +28,7 @@ class StepperMotor {
         void revolve(int32_t revolutions=1);
         void set_speed(uint32_t rpm=200);
         void home();
-        void update_position();
+        std::tuple<int32_t, double>  update_position();
         bool step();
         void set_standbyMode(bool);
         bool active();
