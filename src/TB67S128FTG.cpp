@@ -91,7 +91,7 @@ uint8_t TB67S128FTG::get_pulse_width(){
 
 
 void TB67S128FTG::step_for(uint32_t steps){
-    steps_+=steps;
+    steps_=steps;
 }
 
 void TB67S128FTG::step_pulse(){
