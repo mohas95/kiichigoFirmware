@@ -44,7 +44,11 @@ void TB67S128FTG::set_standbyMode(bool active){
     gpio_put(stbyPin_, !active);
     stby_state_ = active;
 
-    LOG_INFO("standby mode is: %s", active ? "Enabled" : "Disabled");
+    // LOG_INFO("standby mode is: %s\n", active ? "Enabled" : "Disabled");
+}
+
+bool TB67S128FTG::get_standbyMode(){
+    return stby_state_;
 }
 
 void TB67S128FTG::set_stepMode(StepMode step_mode){
@@ -55,10 +59,14 @@ void TB67S128FTG::set_stepMode(StepMode step_mode){
     gpio_put(mode2Pin_, modeBits[2]);
 
     current_stepMode_ = step_mode;
-    LOG_INFO("Mode Pins set to 0: %s, 1: %s, 2: %s\n",
-         modeBits[0] ? "true" : "false",
-         modeBits[1] ? "true" : "false",
-         modeBits[2] ? "true" : "false");
+    // LOG_INFO("Mode Pins set to 0: %s, 1: %s, 2: %s\n",
+    //      modeBits[0] ? "true" : "false",
+    //      modeBits[1] ? "true" : "false",
+    //      modeBits[2] ? "true" : "false");
+}
+
+StepperDriver::StepMode TB67S128FTG::get_stepMode(){
+    return current_stepMode_;
 }
 
 void TB67S128FTG::set_direction(bool direction){    
@@ -66,7 +74,7 @@ void TB67S128FTG::set_direction(bool direction){
     gpio_put(dirPin_, direction);
     dir_state_ = direction;
 
-    LOG_INFO("direction set to: %s", direction ? "CW" : "CCW");
+    // LOG_INFO("direction set to: %s\n", direction ? "CW" : "CCW");
 }
 
 
@@ -88,8 +96,6 @@ uint8_t TB67S128FTG::get_pulse_width(){
 }
 
 
-
-
 void TB67S128FTG::step_for(uint32_t steps){
     steps_=steps;
 }
@@ -106,7 +112,7 @@ void TB67S128FTG::step_pulse(){
             gpio_put(stepPin_, false);
             last_time_update_us_ = time_now;
             steps_--;
-            LOG_DEBUG("Pulse Remaining: %d\n", steps_);
+            // LOG_DEBUG("Pulse Remaining: %d\n", steps_);
             // LOG_DEBUG("Pulse: %s | Remaining: %d\n", pulse_state_ ? "HIGH" : "LOW", steps_);
 
             

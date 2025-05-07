@@ -8,16 +8,23 @@ StepperMotor::StepperMotor (const char* label,
                             uint32_t steps_per_rev,
                             uint32_t default_speed) : 
                             label_(label),
-                            driver_(driver),
-                            steps_per_rev_(steps_per_rev)
+                            driver_(driver)
                             {
-//Set default values 
-set_speed(default_speed);
+    //Set default values 
+    set_speed(default_speed);
+
+    StepperDriver::StepMode step_mode = driver_.get_stepMode();
+    auto modeMultiplier = STEP_MODE_MULTIPLIER[static_cast<size_t>(step_mode)];
+    steps_per_rev_ = steps_per_rev*modeMultiplier;
+
+    LOG_DEBUG("%s Defaults set\n steps per revolution: %d\n", label_, steps_per_rev_);
+
 }
 
 void StepperMotor::revolve(int32_t revolutions){
     
     bool direction = revolutions>=0 ? true:false;
+    LOG_DEBUG("%s direction set to: %s\n", label_, direction ? "CW" : "CCW");
 
     driver_.set_direction(direction);
     
@@ -34,6 +41,6 @@ void StepperMotor::set_speed(uint32_t rpm){
 
     driver_.set_pulse_interval(pulse_interval);
 
-    LOG_DEBUG("%s Speed set to: %d rpm (%d us pulse inteval)\n", label_, rpm, pulse_interval);   
+    LOG_DEBUG("%s Speed set to: %d rpm(%d us pulse inteval)\n", label_, rpm, pulse_interval);   
 
 }
