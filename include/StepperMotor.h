@@ -25,8 +25,9 @@ class StepperMotor {
 
         void revolve(int32_t revolutions=1);
         void set_speed(uint32_t rpm=200);
+        void home();
         void update_position();
-        void step();
+        bool step();
 
     private:
         const char* label_;

@@ -58,11 +58,21 @@ void StepperMotor::update_position(){
     LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
 }
 
+void StepperMotor::home(){
 
-void StepperMotor::step(){
+    driver_.home();
+    update_position();
+
+    // LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
+}
+
+
+bool StepperMotor::step(){
     bool pulse_flag = driver_.step_pulse();
     
     if (pulse_flag){
         update_position();
     }
+
+    return pulse_flag;
 }
