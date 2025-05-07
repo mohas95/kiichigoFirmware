@@ -146,3 +146,8 @@ void TB67S128FTG::home(){
 int32_t TB67S128FTG::get_step_tracker(){
     return step_tracker_;
 }
+
+bool TB67S128FTG::active(){
+
+    return steps_ > 0 ? true:false; 
+}

@@ -28,6 +28,7 @@ class StepperMotor {
         void home();
         void update_position();
         bool step();
+        bool active();
 
     private:
         const char* label_;

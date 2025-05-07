@@ -27,28 +27,22 @@ int main()
     // stepper1.step_for(1000);
     stepper1.revolve(-5);
 
-    bool step_flag= true;
-
-    while (step_flag) {
-        step_flag = stepper1.step();
+    while (stepper1.active()) {
+        stepper1.step();
     }
 
     stepper1.revolve(-5);
 
-    step_flag= true;
-
-    while (step_flag) {
-        step_flag = stepper1.step();
+    while (stepper1.active()) {
+        stepper1.step();
     }
 
     stepper1.home();
     stepper1.set_speed(200);
     stepper1.revolve(10);
 
-    step_flag= true;
-
-    while (step_flag) {
-        step_flag = stepper1.step();
+    while (stepper1.active()) {
+        stepper1.step();
     }
 
     printf("Done!\n");

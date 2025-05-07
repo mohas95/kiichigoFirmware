@@ -67,6 +67,10 @@ void StepperMotor::home(){
 }
 
 
+bool StepperMotor::active(){
+    return driver_.active();
+}
+
 bool StepperMotor::step(){
     bool pulse_flag = driver_.step_pulse();
     

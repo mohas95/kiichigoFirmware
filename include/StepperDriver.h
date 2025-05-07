@@ -33,6 +33,8 @@ class StepperDriver {
 
         virtual void home() = 0;
         virtual int32_t get_step_tracker() = 0;
+        virtual bool active() = 0;
+
         
         virtual ~StepperDriver(){};
 
