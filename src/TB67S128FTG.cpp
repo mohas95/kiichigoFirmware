@@ -112,7 +112,7 @@ void TB67S128FTG::step_pulse(){
             gpio_put(stepPin_, false);
             last_time_update_us_ = time_now;
             steps_--;
-            // LOG_DEBUG("Pulse Remaining: %d\n", steps_);
+            LOG_DEBUG("Pulse Remaining: %d\n", steps_);
             // LOG_DEBUG("Pulse: %s | Remaining: %d\n", pulse_state_ ? "HIGH" : "LOW", steps_);
 
             

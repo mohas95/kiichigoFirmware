@@ -27,7 +27,7 @@ class StepperMotor {
         void set_speed(uint32_t rpm=200);
 
     private:
-        const char*  label_;
+        const char* label_;
         uint32_t steps_per_rev_;
         uint32_t speed_;
         StepperDriver& driver_;
