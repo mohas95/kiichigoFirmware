@@ -1,7 +1,7 @@
 #include "StepperMotor.h"
 
 StepperMotor::StepperMotor (const char* label,
-                            StepperDriver& driver,
+                            StepperDriver &driver,
                             uint8_t steps_per_rev) : 
                             label_(label),
                             driver_(driver),
@@ -10,5 +10,5 @@ StepperMotor::StepperMotor (const char* label,
 
 void StepperMotor::revolve(uint32_t revolutions){
     uint32_t steps = revolutions*steps_per_rev_;
-    driver_.step_for(revolutions);
+    driver_.step_for(steps);
 }

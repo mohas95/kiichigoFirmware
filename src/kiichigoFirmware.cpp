@@ -21,13 +21,12 @@ int main()
 
 
     // stepper1.step_for(1000);
+    stepper1.revolve(5);
 
 
     while (true) {
 
-        // stepper_driver1.step_pulse();
-
-        stepper1.revolve(5);
+        stepper_driver1.step_pulse();      
 
     }
 
