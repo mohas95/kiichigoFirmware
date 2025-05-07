@@ -16,8 +16,11 @@ StepperMotor::StepperMotor (const char* label,
     auto modeMultiplier = STEP_MODE_MULTIPLIER[static_cast<size_t>(step_mode)];
     steps_per_rev_ = steps_per_rev*modeMultiplier;
 
-    LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_, modeMultiplier, steps_per_rev_);
     set_speed(default_speed);
+    update_position();
+
+    LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_, modeMultiplier, steps_per_rev_);
+
 
 }
 
@@ -46,4 +49,20 @@ void StepperMotor::set_speed(uint32_t rpm){
 
     LOG_DEBUG("%s Speed set to: %d rpm(%d us pulse inteval)\n", label_, rpm, pulse_interval);   
 
+}
+
+void StepperMotor::update_position(){
+    position_step_ = driver_.get_step_tracker();
+    position_revolutions_ = position_step_/steps_per_rev_;
+
+    LOG_DEBUG("%s Position: %d steps (%d revolutions) \n", label_, position_step_, position_revolutions_);   
+}
+
+
+void StepperMotor::step(){
+    bool pulse_flag = driver_.step_pulse();
+    
+    if (pulse_flag){
+        update_position();
+    }
 }

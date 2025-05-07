@@ -43,7 +43,10 @@ class TB67S128FTG : public StepperDriver{
         StepMode get_stepMode() override;
         bool get_standbyMode() override;
 
-        void step_pulse() override;
+        void home() override;
+
+        bool step_pulse() override;
+        int32_t get_step_tracker() override;
 
 
 
@@ -55,6 +58,7 @@ class TB67S128FTG : public StepperDriver{
         uint32_t pulse_interval_; // in microseconds
         StepMode current_stepMode_;
         uint32_t steps_=0;
+        int32_t step_tracker_;
 
 };
 
