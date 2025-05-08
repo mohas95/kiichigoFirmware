@@ -4,7 +4,9 @@
 #include "Log.h"
 #include "TB67S128FTG.h"
 #include "StepperMotor.h"
-// #include "Scheduler.h"
+#include "MotionPlanner.h"
+
+MotionConfig config;
 
 int main()
 {
@@ -20,6 +22,9 @@ int main()
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
     StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
+
+    config.stepper_motors={&stepper1};
+
 
     stepper1.revolve(-5);
 

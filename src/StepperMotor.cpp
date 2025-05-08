@@ -3,7 +3,7 @@
 #include <cmath>
 
 
-StepperMotor::StepperMotor (const char* label,
+StepperMotor::StepperMotor (std::string label,
                             StepperDriver &driver,
                             uint32_t steps_per_rev,
                             uint32_t default_speed) : 
@@ -19,7 +19,7 @@ StepperMotor::StepperMotor (const char* label,
     set_speed(default_speed);
     update_position();
 
-    LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_, modeMultiplier, steps_per_rev_);
+    LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_.c_str(), modeMultiplier, steps_per_rev_);
 
 
 }
@@ -29,12 +29,12 @@ void StepperMotor::revolve(int32_t revolutions){
     bool direction = revolutions>=0 ? true:false;
     driver_.set_direction(direction);
     
-    LOG_DEBUG("%s direction set to: %s\n", label_, direction ? "CW" : "CCW");
+    LOG_DEBUG("%s direction set to: %s\n", label_.c_str(), direction ? "CW" : "CCW");
     
     uint32_t steps = std::abs(revolutions)*steps_per_rev_;
     driver_.step_for(steps);
     
-    LOG_DEBUG("%s set for: %d revolutions \n", label_, std::abs(revolutions));
+    LOG_DEBUG("%s set for: %d revolutions \n", label_.c_str(), std::abs(revolutions));
 
 }
 
@@ -47,7 +47,7 @@ void StepperMotor::set_speed(uint32_t rpm){
 
     driver_.set_pulse_interval(pulse_interval);
 
-    LOG_DEBUG("%s Speed set to: %d rpm(%d us pulse inteval)\n", label_, rpm, pulse_interval);   
+    LOG_DEBUG("%s Speed set to: %d rpm(%d us pulse inteval)\n", label_.c_str(), rpm, pulse_interval);   
 
 }
 
@@ -55,7 +55,7 @@ std::tuple<int32_t, double> StepperMotor::update_position(){
     position_step_ = driver_.get_step_tracker();
     position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);
 
-    LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);
+    LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);
 
     return std::make_tuple(position_step_,position_revolutions_);  
 }
@@ -65,13 +65,13 @@ void StepperMotor::home(){
     driver_.home();
     update_position();
 
-    LOG_DEBUG("%s HOME HIT! Position reset to: %d steps (%.2f revolutions) \n", label_, position_step_, position_revolutions_);   
+    LOG_DEBUG("%s HOME HIT! Position reset to: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);   
 
 }
 
 void StepperMotor::set_standbyMode(bool active){
     driver_.set_standbyMode(active);
-    LOG_DEBUG("%s Standby Mode %s", label_, active ?"enabled":"disabled");   
+    LOG_DEBUG("%s Standby Mode %s", label_.c_str(), active ?"enabled":"disabled");   
 
 }
 
@@ -88,3 +88,7 @@ bool StepperMotor::step(){
 
     return pulse_flag;
 }
+
+const std::string& StepperMotor::label() const{
+    return label_;
+};
