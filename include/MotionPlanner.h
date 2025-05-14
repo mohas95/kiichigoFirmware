@@ -3,6 +3,13 @@
 #include "StepperMotor.h"
 #include <vector>
 #include <unordered_map>
+#include <queue>
+#include <functional>
+#include <sstream>
+#include <string.h>
+
+
+
 
 
 #define BUFFER_SIZE 64
@@ -17,9 +24,9 @@ class MotionPlanner{
 
         MotionPlanner(const MotionConfig& config);
 
-        bool start_action();
+        std::string read_serial_line();
 
-        void update_action();
+        bool update_action();
 
         void loop_forever();
 
@@ -27,15 +34,17 @@ class MotionPlanner{
 
         void request_action();
 
-        void load_action_queue();
-
-        void process_command(const char* line);
+        // void process_command(const char* line);
     
     private:
-        bool action_queue_;
+
+        void register_commands_();
+
+
+        std::queue<std::function<void()>> action_queue_;
         char input_buffer[BUFFER_SIZE];
-        // std::vector<StepperMotor*> stepper_motors_;
         std::unordered_map<std::string, StepperMotor*> stepper_motors_;
+        std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;
         
 
 };
