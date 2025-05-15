@@ -4,6 +4,7 @@
 #include "StepperDriver.h"
 #include <array>
 #include <tuple>
+#include <string>
 
 
 
@@ -20,10 +21,10 @@ class StepperMotor {
             128      // ONE_128
         }};
 
-        StepperMotor(const char* label,
+        StepperMotor(std::string label,
                      StepperDriver& driver,
                      uint32_t steps_per_rev,
-                     uint32_t default_speed=200); //in rpms
+                     uint32_t default_speed=200); //in rpm
 
         void revolve(int32_t revolutions=1);
         void set_speed(uint32_t rpm=200);
@@ -33,8 +34,10 @@ class StepperMotor {
         void set_standbyMode(bool);
         bool active();
 
+        const std::string& label() const;
+
     private:
-        const char* label_;
+        std::string label_;
         uint32_t steps_per_rev_, speed_;
         StepperDriver& driver_;
         int32_t position_step_;

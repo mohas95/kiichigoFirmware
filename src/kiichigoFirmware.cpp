@@ -4,7 +4,9 @@
 #include "Log.h"
 #include "TB67S128FTG.h"
 #include "StepperMotor.h"
-// #include "Scheduler.h"
+#include "MotionPlanner.h"
+
+MotionConfig config;
 
 int main()
 {
@@ -19,32 +21,16 @@ int main()
     printf("USB Serial connected!\n");
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
-    StepperMotor stepper1("x-axis", stepper_driver1, 200, 100);
+    StepperMotor stepper1("x", stepper_driver1, 200, 100);
 
-    stepper1.revolve(-5);
+    config.stepper_motors={&stepper1};
 
-    while (stepper1.active()) {
-        stepper1.step();
-    }
 
-    stepper1.revolve(-5);
 
-    while (stepper1.active()) {
-        stepper1.step();
-    }
+    MotionPlanner stepper_controller(config);
 
-    stepper1.home();
-    stepper1.set_speed(200);
-    stepper1.revolve(10);
 
-    while (stepper1.active()) {
-        stepper1.step();
-    }
-
-    stepper1.set_standbyMode(true);
-
-    while (true){
-    }
+    stepper_controller.loop_forever(); //this is blocking
 
     printf("Done!\n");
 
