@@ -26,7 +26,7 @@ class StepperMotor {
                      uint32_t steps_per_rev,
                      uint32_t default_speed=200); //in rpm
 
-        void revolve(int32_t revolutions=1);
+        void revolve(double revolutions=1.0);
         void set_speed(uint32_t rpm=200);
         void home();
         std::tuple<int32_t, double>  update_position();

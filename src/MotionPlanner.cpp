@@ -116,11 +116,11 @@ void MotionPlanner::register_commands_(){
 
     command_handlers_["MOVE"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
-            "MOVE X,10 Y,100 Z,-100"
+            "MOVE X,10.0 Y,100.0 Z,-100.0"
         */
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
-        std::unordered_map<std::string, int32_t> command_dict;
+        std::unordered_map<std::string, double> command_dict;
         while (iss >> token){
 
             if (token.length() <2 ) {continue;}
@@ -135,12 +135,12 @@ void MotionPlanner::register_commands_(){
                     continue;
                 }
 
-                if (value_str.empty() || (!is_integer_(value_str))) {
+                if (value_str.empty() || (!is_float_(value_str))) {
                     LOG_WARN("Invalid input: %s\n", value_str.c_str());
                     continue;
                 }
 
-                int32_t value = std::stoi(value_str);
+                double value = std::stod(value_str);
                 command_dict[label] = value;
 
             }else{
@@ -156,7 +156,7 @@ void MotionPlanner::register_commands_(){
                 for(const auto& [label, value] : command_dict){
 
                     stepper_motors_[label]->revolve(value);
-                    LOG_INFO("Action: MOVE %s -> %d revolutions\n", label.c_str(), value);
+                    LOG_INFO("Action: MOVE %s -> %0.2f revolutions\n", label.c_str(), value);
 
                 }
             });
@@ -309,4 +309,14 @@ bool MotionPlanner::sto_bool_(const std::string& s) {
     LOG_ERROR("Invalid boolean string: %s", s.c_str());
 
     return false;
+}
+
+bool MotionPlanner::is_float_(const std::string& s) {
+    if (s.empty()) return false;
+
+    std::istringstream iss(s);
+    float val;
+    iss >> std::noskipws >> val;
+
+    return !iss.fail() && iss.eof();
 }
