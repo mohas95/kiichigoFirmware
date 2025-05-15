@@ -118,7 +118,7 @@ void MotionPlanner::register_commands_(){
         /*This command parses commands from serial with this format:
             "MOVE X,10 Y,100 Z,-100"
         */
-        std::string full_line = std::string(std::istreambuf_iterator<char>(iss), {});
+        std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
         std::unordered_map<std::string, int32_t> command_dict;
         while (iss >> token){
@@ -174,7 +174,7 @@ void MotionPlanner::register_commands_(){
         /*This command parses commands from serial with this format:
             "SPEED X,200 Y,100 Z,300" will take negative values as absolute value
         */
-        std::string full_line = std::string(std::istreambuf_iterator<char>(iss), {});
+        std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
         std::unordered_map<std::string, uint32_t> command_dict;
 
@@ -229,7 +229,7 @@ void MotionPlanner::register_commands_(){
         /*This command parses commands from serial with this format:
             "STANDBY X,0 Y,1 Z,0"
         */
-        std::string full_line = std::string(std::istreambuf_iterator<char>(iss), {});
+        std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
         std::unordered_map<std::string, bool> command_dict;
 
