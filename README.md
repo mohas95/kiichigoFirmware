@@ -142,6 +142,10 @@ int main()
     /*Serial Command List: 
     
         1. MOVE <motorlabel1>,<revolutions> <motorlabel2><revolutions> ...: This command sets the number of revolutions that each motor in the motion planner should make, currently only accepts int (ex. "MOVE x,100 y,-100 z,10")
+        
+        2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`><`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts uint (ex. "SPEED x,100 y,200 z,50")
+        
+        3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`><`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
     */
 
     printf("Done!\n");
@@ -175,8 +179,8 @@ All kinds of feedback and contributions are welcome.
     - Current Functionality is to receive commands from Serial USB 
     - Concurrent operation with the loop_forever() method (blocking)
     - USB Serial Command list:
-        1. MOVE <`motorlabel1`>,<`revolutions`> <`motorlabel2`><`revolutions`> ... : This command sets the number of revolutions that each motor in the motion planner should make, currently only accepts int (ex. "MOVE x,100 y,-100 z,10")
-        2. SPEED (in progress)
-        3. STANDBY (in progress)
+        1. MOVE <`motorlabel1`>,<`revolutions`> <`motorlabel2`><`revolutions`> ... : This command sets the number of revolutions that each motor in the motion planner should make, accepts double (ex. "MOVE x,100 y,-100 z,10")
+        2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`><`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts uint (ex. "SPEED x,100 y,200 z,50")
+        3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`><`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
         4. POSITION (in progress)
-        4. HOME (in progress)
+        5. HOME (in progress)

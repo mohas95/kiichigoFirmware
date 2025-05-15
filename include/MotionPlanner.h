@@ -30,6 +30,9 @@ class MotionPlanner{
 
         void register_commands_();
         bool is_integer_(const std::string& s);
+        bool is_bool_(const std::string& s);
+        bool is_float_(const std::string& s);
+        bool sto_bool_(const std::string& s);
 
 
         std::queue<std::function<void()>> action_queue_;

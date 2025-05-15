@@ -24,17 +24,17 @@ StepperMotor::StepperMotor (std::string label,
 
 }
 
-void StepperMotor::revolve(int32_t revolutions){
+void StepperMotor::revolve(double revolutions){
     
     bool direction = revolutions>=0 ? true:false;
     driver_.set_direction(direction);
     
     LOG_DEBUG("%s direction set to: %s\n", label_.c_str(), direction ? "CW" : "CCW");
     
-    uint32_t steps = std::abs(revolutions)*steps_per_rev_;
+    uint32_t steps = static_cast<uint32_t>(std::round(std::abs(revolutions) * steps_per_rev_));
     driver_.step_for(steps);
     
-    LOG_DEBUG("%s set for: %d revolutions \n", label_.c_str(), std::abs(revolutions));
+    LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), std::abs(revolutions));
 
 }
 

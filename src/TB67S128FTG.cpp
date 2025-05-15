@@ -114,9 +114,9 @@ bool TB67S128FTG::step_pulse(){
             last_time_update_us_ = time_now;
             steps_--;
 
-            if(dir_state_){
+            if(dir_state_ && !stby_state_){
                 step_tracker_++;
-            } else if (!dir_state_){
+            } else if (!dir_state_ && !stby_state_){
                 step_tracker_--;
             }
             
