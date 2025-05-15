@@ -9,9 +9,6 @@
 #include <string.h>
 
 
-
-
-
 #define BUFFER_SIZE 64
 
 struct MotionConfig{
@@ -26,23 +23,19 @@ class MotionPlanner{
 
         std::string read_serial_line();
 
-        bool update_action();
+        bool update_actions();
 
         void loop_forever();
 
-        bool stop();
-
         void request_action();
-
-        // void process_command(const char* line);
     
     private:
 
         void register_commands_();
+        bool is_integer_(const std::string& s);
 
 
         std::queue<std::function<void()>> action_queue_;
-        char input_buffer[BUFFER_SIZE];
         std::unordered_map<std::string, StepperMotor*> stepper_motors_;
         std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;
         
