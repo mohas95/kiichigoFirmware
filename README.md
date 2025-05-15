@@ -106,6 +106,53 @@ int main()
 }
 ```
 
+Concurrent Multi-motor operation the MotionPlanner package
+``` cpp
+#include <stdio.h>
+#include "pico/stdlib.h"
+
+#include "Log.h"
+#include "TB67S128FTG.h"
+#include "StepperMotor.h"
+#include "MotionPlanner.h"
+
+MotionConfig config; //struct for configuring the motors to be used in the MotionPlanner object
+
+int main()
+{
+    stdio_init_all();
+
+    // Wait for USB serial to be connected
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+
+    // Print a message to the USB serial
+    printf("USB Serial connected!\n");
+
+    TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
+    StepperMotor stepper1("x", stepper_driver1, 200, 100);
+
+    config.stepper_motors={&stepper1}; // declare all stepper motors to be controlled by the MotionPlanner object in the the MotionConfig struct;
+
+    MotionPlanner stepper_controller(config); // instantiate the MotionPlanner
+
+
+    stepper_controller.loop_forever(); //continous action request operation through serial Monitor, using the FIFO principle (this is blocking)
+    /*Serial Command List: 
+    
+        1. MOVE <motorlabel1>,<revolutions> <motorlabel2><revolutions> ...: This command sets the number of revolutions that each motor in the motion planner should make, currently only accepts int (ex. "MOVE x,100 y,-100 z,10")
+    */
+
+    printf("Done!\n");
+
+    return 0;
+}
+
+```
+
+
+
 
 ## Feedback
 All kinds of feedback and contributions are welcome.
@@ -124,3 +171,12 @@ All kinds of feedback and contributions are welcome.
 - [TB67S128FTG](https://www.pololu.com/product/2998) Motor Driver Support added inherets from StepperDriver.
 - StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control, position tracking. Dependent on StepperDriver class. 
 - Logging module added to simplify displaying various levels of messages on Serial Monitor.
+- Multi-Motor Control with the MotionPlanner Package.
+    - Current Functionality is to receive commands from Serial USB 
+    - Concurrent operation with the loop_forever() method (blocking)
+    - USB Serial Command list:
+        1. MOVE <`motorlabel1`>,<`revolutions`> <`motorlabel2`><`revolutions`> ... : This command sets the number of revolutions that each motor in the motion planner should make, currently only accepts int (ex. "MOVE x,100 y,-100 z,10")
+        2. SPEED (in progress)
+        3. STANDBY (in progress)
+        4. POSITION (in progress)
+        4. HOME (in progress)

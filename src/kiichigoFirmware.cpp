@@ -32,33 +32,6 @@ int main()
 
     stepper_controller.loop_forever(); //this is blocking
 
-
-
-    // stepper1.revolve(-5);
-
-    // while (stepper1.active()) {
-    //     stepper1.step();
-    // }
-
-    // stepper1.revolve(-5);
-
-    // while (stepper1.active()) {
-    //     stepper1.step();
-    // }
-
-    // stepper1.home();
-    // stepper1.set_speed(200);
-    // stepper1.revolve(10);
-
-    // while (stepper1.active()) {
-    //     stepper1.step();
-    // }
-
-    // stepper1.set_standbyMode(true);
-
-    // while (true){
-    // }
-
     printf("Done!\n");
 
     return 0;
