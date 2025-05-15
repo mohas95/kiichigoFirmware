@@ -118,6 +118,7 @@ void MotionPlanner::register_commands_(){
         /*This command parses commands from serial with this format:
             "MOVE X,10 Y,100 Z,-100"
         */
+        std::string full_line = std::string(std::istreambuf_iterator<char>(iss), {});
         std::string token;
         std::unordered_map<std::string, int32_t> command_dict;
         while (iss >> token){
@@ -155,12 +156,15 @@ void MotionPlanner::register_commands_(){
                 for(const auto& [label, value] : command_dict){
 
                     stepper_motors_[label]->revolve(value);
-                    LOG_INFO("Added to Queue: MOVE %s -> %d revolutions\n", label.c_str(), value);
+                    LOG_INFO("Action: MOVE %s -> %d revolutions\n", label.c_str(), value);
 
                 }
             });
+
+            LOG_INFO("Added to Queue: MOVE %s\n", full_line.c_str());
+
         }else{
-            LOG_WARN("No valid actions in MOVE command\n");
+            LOG_WARN("No valid actions in MOVE command: %s\n", full_line.c_str());
         }
 
     };
@@ -170,6 +174,7 @@ void MotionPlanner::register_commands_(){
         /*This command parses commands from serial with this format:
             "SPEED X,200 Y,100 Z,300" will take negative values as absolute value
         */
+        std::string full_line = std::string(std::istreambuf_iterator<char>(iss), {});
         std::string token;
         std::unordered_map<std::string, uint32_t> command_dict;
 
@@ -207,12 +212,15 @@ void MotionPlanner::register_commands_(){
                 for(const auto& [label, value] : command_dict){
 
                     stepper_motors_[label]->set_speed(value);
-                    LOG_INFO("Added to Queue: SPEED %s -> %d rpm\n", label.c_str(), value);
+                    LOG_INFO("Action: SPEED %s -> %d rpm\n", label.c_str(), value);
 
                 }
             });
+
+            LOG_INFO("Added to Queue: SPEED %s\n", full_line.c_str());
+
         }else{
-            LOG_WARN("No valid actions in SPEED command\n");
+            LOG_WARN("No valid actions in SPEED command: %s\n", full_line.c_str());
         }
 
     };
@@ -221,6 +229,7 @@ void MotionPlanner::register_commands_(){
         /*This command parses commands from serial with this format:
             "STANDBY X,0 Y,1 Z,0"
         */
+        std::string full_line = std::string(std::istreambuf_iterator<char>(iss), {});
         std::string token;
         std::unordered_map<std::string, bool> command_dict;
 
@@ -258,12 +267,14 @@ void MotionPlanner::register_commands_(){
                 for(const auto& [label, value] : command_dict){
 
                     stepper_motors_[label]->set_standbyMode(value);
-                    LOG_INFO("Added to Queue: STANDBY %s -> %s\n", label.c_str(), value ? "enabled": "disabled");
+                    LOG_INFO("Action: STANDBY %s -> %s\n", label.c_str(), value ? "enabled": "disabled");
 
                 }
             });
+            LOG_INFO("Added to Queue: STANDBY %s\n", full_line.c_str());
+
         }else{
-            LOG_WARN("No valid actions in STANDBY command\n");
+            LOG_WARN("No valid actions in STANDBY command: %s\n", full_line.c_str());
         }
 
     };
