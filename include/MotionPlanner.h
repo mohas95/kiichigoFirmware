@@ -8,9 +8,6 @@
 #include <sstream>
 #include <string.h>
 
-
-#define BUFFER_SIZE 64
-
 struct MotionConfig{
     std::vector<StepperMotor*> stepper_motors={};
 };

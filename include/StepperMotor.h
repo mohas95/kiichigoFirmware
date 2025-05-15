@@ -24,7 +24,7 @@ class StepperMotor {
         StepperMotor(std::string label,
                      StepperDriver& driver,
                      uint32_t steps_per_rev,
-                     uint32_t default_speed=200); //in rpms
+                     uint32_t default_speed=200); //in rpm
 
         void revolve(int32_t revolutions=1);
         void set_speed(uint32_t rpm=200);
