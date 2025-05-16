@@ -165,8 +165,10 @@ All kinds of feedback and contributions are welcome.
 - reach out to @mohas95
 
 ## Contributors
-- Mohamed Debbagh
+- Mohamed Debbagh (Main Author)
     - [github](https://github.com/mohas05/), [website](https://mohas95.github.io/)
+- Axel Refalo
+    - [github](https://github.com/axelrefalo)
 
 ## Change Log
 ### 0.0.1 (Not released yet)
