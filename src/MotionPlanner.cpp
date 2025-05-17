@@ -286,12 +286,12 @@ void MotionPlanner::register_commands_(){
 
     command_handlers_["HIT"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
-            "HIT X,10.0 Y,200.5 Z,30.0"
+            "HIT X,10.0 Y,200.5 Z,-30.0"
             This is an INTERUPT command 
         */
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
-        std::unordered_map<std::string, bool> command_dict;
+        std::unordered_map<std::string, double> command_dict;
 
         while(iss>>token){
 
@@ -306,12 +306,12 @@ void MotionPlanner::register_commands_(){
                     continue;
                 }
 
-                if (value_str.empty() || (!is_bool_(value_str))) {
+                if (value_str.empty() || (!is_float_(value_str))) {
                     LOG_WARN("Invalid input: %s\n", value_str.c_str());
                     continue;
                 }
 
-                bool value = sto_bool_(value_str);
+                double value = std::stod(value_str);
                 command_dict[label] = value;
 
             }else{
@@ -322,19 +322,17 @@ void MotionPlanner::register_commands_(){
 
         if(!command_dict.empty()){
 
-            action_queue_.push([command_dict, this](){
+            for(const auto& [label, value] : command_dict){
 
-                for(const auto& [label, value] : command_dict){
+                stepper_motors_[label]->revolve(0); // sets all steps to zero
+                stepper_motors_[label]->update_position(value);
 
-                    stepper_motors_[label]->set_standbyMode(value);
-                    LOG_INFO("Action: STANDBY %s -> %s\n", label.c_str(), value ? "enabled": "disabled");
+            }
 
-                }
-            });
-            LOG_INFO("Added to Queue: STANDBY %s\n", full_line.c_str());
+            LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
 
         }else{
-            LOG_WARN("No valid actions in STANDBY command: %s\n", full_line.c_str());
+            LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
         }
 
     };

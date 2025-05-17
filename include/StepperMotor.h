@@ -30,6 +30,7 @@ class StepperMotor {
         void set_speed(uint32_t rpm=200);
         void home();
         std::tuple<int32_t, double>  update_position();
+        void update_position(double);
         bool step();
         void set_standbyMode(bool);
         bool active();

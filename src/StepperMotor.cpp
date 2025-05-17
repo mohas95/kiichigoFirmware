@@ -60,6 +60,14 @@ std::tuple<int32_t, double> StepperMotor::update_position(){
     return std::make_tuple(position_step_,position_revolutions_);  
 }
 
+void StepperMotor::update_position(double rev_pos){
+
+    position_step_ = static_cast<int32_t>(std::round(rev_pos * static_cast<double>(steps_per_rev_)));
+    position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);
+
+    LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);
+}
+
 void StepperMotor::home(){
 
     driver_.home();
