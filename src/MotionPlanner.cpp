@@ -337,6 +337,50 @@ void MotionPlanner::register_commands_(){
 
     };
 
+
+    command_handlers_["STOP"] = [&](std::istringstream& iss) {
+        /*This command parses commands from serial with this format:
+            "STOP X Y Z"
+            This is an INTERUPT command 
+        */
+        std::string full_line = iss.str().substr(iss.tellg());
+        std::string token;
+        std::vector<std::string> command_vec;
+
+        while(iss>>token){
+
+            if (token.length() <1 ) {
+                continue;
+                LOG_WARN("Invalid token: %s\n", token.c_str());
+            }
+
+            std::string label=token;
+            
+            if(stepper_motors_.find(label) == stepper_motors_.end()){
+                LOG_WARN("Unknown motor: %s\n",label.c_str());
+                continue;
+            }
+
+            command_vec.push_back(label);
+
+        }
+
+        if(!command_vec.empty()){
+
+            for(const auto& label : command_vec){
+                stepper_motors_[label]->revolve(0); // sets all steps to zero
+                stepper_motors_[label]->update_position();
+            }
+
+            LOG_INFO("INTERUPT: STOP %s\n", full_line.c_str());
+
+        }else{
+            LOG_WARN("No valid actions in STOP command: %s\n", full_line.c_str());
+        }
+
+    };
+
+
 }
 
 
