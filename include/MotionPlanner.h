@@ -19,11 +19,8 @@ class MotionPlanner{
         MotionPlanner(const MotionConfig& config);
 
         std::string read_serial_line();
-
         bool update_actions();
-
         void loop_forever();
-
         void request_action();
     
     private:
