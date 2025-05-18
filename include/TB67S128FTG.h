@@ -47,6 +47,7 @@ class TB67S128FTG : public StepperDriver{
 
         bool step_pulse() override;
         int32_t get_step_tracker() override;
+        void set_step_tracker(int32_t) override;
         bool active() override;
 
 

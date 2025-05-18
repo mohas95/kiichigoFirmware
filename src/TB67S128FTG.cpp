@@ -147,6 +147,11 @@ int32_t TB67S128FTG::get_step_tracker(){
     return step_tracker_;
 }
 
+void TB67S128FTG::set_step_tracker(int32_t pos){
+
+    step_tracker_ = pos;
+}
+
 bool TB67S128FTG::active(){
 
     return steps_ > 0 ? true:false; 

@@ -24,12 +24,13 @@ class StepperMotor {
         StepperMotor(std::string label,
                      StepperDriver& driver,
                      uint32_t steps_per_rev,
-                     uint32_t default_speed=200); //in rpm
+                     double default_speed=200); //in rpm
 
         void revolve(double revolutions=1.0);
-        void set_speed(uint32_t rpm=200);
+        void set_speed(double rpm=200);
         void home();
         std::tuple<int32_t, double>  update_position();
+        void update_position(double);
         bool step();
         void set_standbyMode(bool);
         bool active();
@@ -38,10 +39,10 @@ class StepperMotor {
 
     private:
         std::string label_;
-        uint32_t steps_per_rev_, speed_;
+        uint32_t steps_per_rev_;
         StepperDriver& driver_;
         int32_t position_step_;
-        double position_revolutions_;
+        double position_revolutions_, speed_;
 
 };
 

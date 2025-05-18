@@ -117,6 +117,7 @@ void MotionPlanner::register_commands_(){
     command_handlers_["MOVE"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
             "MOVE X,10.0 Y,100.0 Z,-100.0"
+            This is an QUEUED command 
         */
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
@@ -172,11 +173,12 @@ void MotionPlanner::register_commands_(){
     
     command_handlers_["SPEED"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
-            "SPEED X,200 Y,100 Z,300" will take negative values as absolute value
+            "SPEED X,200.0 Y,100.0 Z,300.0" will take negative values as absolute value
+            This is an QUEUED command 
         */
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
-        std::unordered_map<std::string, uint32_t> command_dict;
+        std::unordered_map<std::string, double> command_dict;
 
         while(iss>>token){
 
@@ -191,12 +193,13 @@ void MotionPlanner::register_commands_(){
                     continue;
                 }
 
-                if (value_str.empty() || (!is_integer_(value_str))) {
+                if (value_str.empty() || (!is_float_(value_str))) {
                     LOG_WARN("Invalid input: %s\n", value_str.c_str());
                     continue;
                 }
 
-                uint32_t value = static_cast<uint32_t>(std::abs(std::stoi(value_str)));
+                // uint32_t value = static_cast<uint32_t>(std::abs(std::stoi(value_str)));
+                double value = std::abs(std::stod(value_str));
                 command_dict[label] = value;
 
             }else{
@@ -212,7 +215,7 @@ void MotionPlanner::register_commands_(){
                 for(const auto& [label, value] : command_dict){
 
                     stepper_motors_[label]->set_speed(value);
-                    LOG_INFO("Action: SPEED %s -> %d rpm\n", label.c_str(), value);
+                    LOG_INFO("Action: SPEED %s -> %0.2f rpm\n", label.c_str(), value);
 
                 }
             });
@@ -228,6 +231,8 @@ void MotionPlanner::register_commands_(){
     command_handlers_["STANDBY"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
             "STANDBY X,0 Y,1 Z,0"
+            This is an QUEUED command 
+
         */
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
@@ -279,8 +284,118 @@ void MotionPlanner::register_commands_(){
 
     };
 
-}
 
+    command_handlers_["HIT"] = [&](std::istringstream& iss) {
+        /*This command parses commands from serial with this format:
+            "HIT X,10.0 Y,200.5 Z,-30.0"
+            This is an INTERUPT command 
+        */
+        std::string full_line = iss.str().substr(iss.tellg());
+        std::string token;
+        std::unordered_map<std::string, double> command_dict;
+
+        while(iss>>token){
+
+            if (token.length() <2 ) {continue;}
+
+            std::istringstream command_stream(token);
+            std::string label, value_str;
+
+            if(std::getline(command_stream, label, ',') && std::getline(command_stream, value_str)){
+                if(stepper_motors_.find(label) == stepper_motors_.end()){
+                    LOG_WARN("Unknown motor: %s\n",label.c_str());
+                    continue;
+                }
+
+                if (value_str.empty() || (!is_float_(value_str))) {
+                    LOG_WARN("Invalid input: %s\n", value_str.c_str());
+                    continue;
+                }
+
+                double value = std::stod(value_str);
+                command_dict[label] = value;
+
+            }else{
+                LOG_WARN("Invalid token: %s\n", token.c_str());
+                continue;
+            }
+        }
+
+        if(!command_dict.empty()){
+
+            for(const auto& [label, value] : command_dict){
+
+                stepper_motors_[label]->revolve(0); // sets all steps to zero
+                stepper_motors_[label]->update_position(value);
+
+            }
+
+            // Clear pending commands
+            std::queue<std::function<void()>> empty;
+            std::swap(action_queue_, empty);
+
+            // Flush any buffered serial input
+            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
+
+            LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
+
+        }else{
+            LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
+        }
+
+    };
+
+
+    command_handlers_["STOP"] = [&](std::istringstream& iss) {
+        /*This command parses commands from serial with this format:
+            "STOP X Y Z"
+            This is an INTERUPT command 
+        */
+        std::string full_line = iss.str().substr(iss.tellg());
+        std::string token;
+        std::vector<std::string> command_vec;
+
+        while(iss>>token){
+
+            if (token.length() <1 ) {
+                LOG_WARN("Invalid token: %s\n", token.c_str());
+                continue;
+            }
+
+            std::string label=token;
+            
+            if(stepper_motors_.find(label) == stepper_motors_.end()){
+                LOG_WARN("Unknown motor: %s\n",label.c_str());
+                continue;
+            }
+
+            command_vec.push_back(label);
+
+        }
+
+        if(!command_vec.empty()){
+
+            for(const auto& label : command_vec){
+                stepper_motors_[label]->revolve(0); // sets all steps to zero
+                stepper_motors_[label]->update_position();
+            }
+
+            // Clear pending commands
+            std::queue<std::function<void()>> empty;
+            std::swap(action_queue_, empty);
+
+            // Flush any buffered serial input
+            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
+
+            LOG_INFO("INTERUPT: STOP %s\n", full_line.c_str());
+
+        }else{
+            LOG_WARN("No valid actions in STOP command: %s\n", full_line.c_str());
+        }
+
+    };
+
+}
 
 
 
