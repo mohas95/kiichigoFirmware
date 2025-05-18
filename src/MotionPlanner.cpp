@@ -357,8 +357,8 @@ void MotionPlanner::register_commands_(){
         while(iss>>token){
 
             if (token.length() <1 ) {
-                continue;
                 LOG_WARN("Invalid token: %s\n", token.c_str());
+                continue;
             }
 
             std::string label=token;
@@ -394,9 +394,7 @@ void MotionPlanner::register_commands_(){
 
     };
 
-
 }
-
 
 
 
