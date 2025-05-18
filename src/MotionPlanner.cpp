@@ -329,6 +329,13 @@ void MotionPlanner::register_commands_(){
 
             }
 
+            // Clear pending commands
+            std::queue<std::function<void()>> empty;
+            std::swap(action_queue_, empty);
+
+            // Flush any buffered serial input
+            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
+
             LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
 
         }else{
@@ -371,6 +378,13 @@ void MotionPlanner::register_commands_(){
                 stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position();
             }
+
+            // Clear pending commands
+            std::queue<std::function<void()>> empty;
+            std::swap(action_queue_, empty);
+
+            // Flush any buffered serial input
+            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
 
             LOG_INFO("INTERUPT: STOP %s\n", full_line.c_str());
 
