@@ -6,11 +6,15 @@
 #include "StepperMotor.h"
 #include "MotionPlanner.h"
 
+
 MotionConfig config;
 
 int main()
 {
     stdio_init_all();
+
+    log_set_level(LogLevel::INFO);
+
 
     // Wait for USB serial to be connected
     while (!stdio_usb_connected()) {
