@@ -173,12 +173,12 @@ void MotionPlanner::register_commands_(){
     
     command_handlers_["SPEED"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
-            "SPEED X,200 Y,100 Z,300" will take negative values as absolute value
+            "SPEED X,200.0 Y,100.0 Z,300.0" will take negative values as absolute value
             This is an QUEUED command 
         */
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
-        std::unordered_map<std::string, uint32_t> command_dict;
+        std::unordered_map<std::string, double> command_dict;
 
         while(iss>>token){
 
@@ -193,12 +193,13 @@ void MotionPlanner::register_commands_(){
                     continue;
                 }
 
-                if (value_str.empty() || (!is_integer_(value_str))) {
+                if (value_str.empty() || (!is_float_(value_str))) {
                     LOG_WARN("Invalid input: %s\n", value_str.c_str());
                     continue;
                 }
 
-                uint32_t value = static_cast<uint32_t>(std::abs(std::stoi(value_str)));
+                // uint32_t value = static_cast<uint32_t>(std::abs(std::stoi(value_str)));
+                double value = std::abs(std::stod(value_str));
                 command_dict[label] = value;
 
             }else{
@@ -214,7 +215,7 @@ void MotionPlanner::register_commands_(){
                 for(const auto& [label, value] : command_dict){
 
                     stepper_motors_[label]->set_speed(value);
-                    LOG_INFO("Action: SPEED %s -> %d rpm\n", label.c_str(), value);
+                    LOG_INFO("Action: SPEED %s -> %0.2f rpm\n", label.c_str(), value);
 
                 }
             });

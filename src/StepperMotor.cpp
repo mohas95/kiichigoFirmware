@@ -6,7 +6,7 @@
 StepperMotor::StepperMotor (std::string label,
                             StepperDriver &driver,
                             uint32_t steps_per_rev,
-                            uint32_t default_speed) : 
+                            double default_speed) : 
                             label_(label),
                             driver_(driver)
                             {
@@ -38,16 +38,16 @@ void StepperMotor::revolve(double revolutions){
 
 }
 
-void StepperMotor::set_speed(uint32_t rpm){
+void StepperMotor::set_speed(double rpm){
     speed_ = rpm;
 
     uint8_t pulse_width = driver_.get_pulse_width();
-    double pulse_length = 60'000'000.0/(rpm*steps_per_rev_);
+    double pulse_length = 60'000'000.0/(rpm* static_cast<double>(steps_per_rev_));
     uint32_t pulse_interval = static_cast<uint32_t>(std::round(pulse_length)) - pulse_width;
 
     driver_.set_pulse_interval(pulse_interval);
 
-    LOG_DEBUG("%s Speed set to: %d rpm(%d us pulse inteval)\n", label_.c_str(), rpm, pulse_interval);   
+    LOG_DEBUG("%s Speed set to: %0.2f rpm(%d us pulse inteval)\n", label_.c_str(), rpm, pulse_interval);   
 
 }
 
