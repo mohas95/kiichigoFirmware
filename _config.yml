@@ -10,4 +10,4 @@ favicon_ico: "/assets/images/favicon.png"
 
 aux_links:
   Template Repository: https://github.com/mohas95/kiichigoFirmware
-  aux_links_new_tab: true
+aux_links_new_tab: true
