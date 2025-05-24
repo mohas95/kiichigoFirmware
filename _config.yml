@@ -1,7 +1,8 @@
 title: KiichigoFirmware Docs
+description: YOUR DESCRIPTION
 theme: just-the-docs
 color_scheme: light
 
 # Needed to ensure paths work when deployed
-url: "https://mohas95.github.io"
-baseurl: "/kiichigoFirmware"
+url: "https://mohas95.github.io/kiichigoFirmware"
+
