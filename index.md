@@ -3,7 +3,7 @@ title: Overview
 layout: home
 ---
 
-![](/assets/video/motion.gif)
+![](kiichigoFirmware/assets/video/motion.gif)
 
 <img src="/assets/video/motion.gif" alt="Alt text" width="400"/>
 
