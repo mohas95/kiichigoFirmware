@@ -4,6 +4,7 @@ theme: just-the-docs
 
 url: https://mohas95.github.io/kiichigoFirmware
 
+logo: "/assets/images/overview.png"
 favicon_ico: "/assets/images/favicon.png"
 
 
