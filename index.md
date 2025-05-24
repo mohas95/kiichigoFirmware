@@ -3,10 +3,7 @@ title: Overview
 layout: home
 ---
 
-![](assets/video/motion.gif)
-
-<img src="/assets/video/motion.gif" alt="Alt text" width="400"/>
-
+<style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style><div class='embed-container'><img src='assets/video/motion.gif' alt='Alt text' width='400'/></div>
 ----
 
 [^1]: [It can take up to 10 minutes for changes to your site to publish after you push the changes to GitHub](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/creating-a-github-pages-site-with-jekyll#creating-your-site).
