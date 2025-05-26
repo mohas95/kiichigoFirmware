@@ -2,6 +2,7 @@
 title: Overview
 layout: home
 ---
+... under construction please visit the [repository page](https://github.com/mohas95/kiichigoFirmware)
 
 <style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style><div class='embed-container'><img src='assets/video/motion.gif' alt='Alt text' width='400'/></div>
 ----
