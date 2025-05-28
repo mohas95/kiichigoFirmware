@@ -141,6 +141,7 @@ void MotionPlanner::loop_forever(){
         }
 
         sleep_ms(1);
+        interupt_flag_= false;
         
     }
 
@@ -357,10 +358,13 @@ void MotionPlanner::register_commands_(){
             }
         }
 
-        if(!command_dict.empty()){
+        if(!command_dict.empty() && !interupt_flag_){
+
+            interupt_flag_=true;
 
             for(const auto& [label, value] : command_dict){
 
+                // bool dir = stepper_motors_[label]->get_direction();
                 // stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position(value);
 
@@ -382,6 +386,9 @@ void MotionPlanner::register_commands_(){
             LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
 
         }else{
+            if(interupt_flag_){
+                LOG_WARN("ANOTHER INTERUPT ACTION IS IN PROGRESS CANNOT PERFORM ACTION: %s\n", full_line.c_str());
+             }
             LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
         }
 
