@@ -13,12 +13,13 @@ class LimitSwitch{
     public:
 
         enum class PullMode {
-            EXTERNAL,       // No internal pull (external pull expected)
+            EXTERNAL_UP,       // external pull up
+            EXTERNAL_DOWN,       // external pull down
             PULL_UP,    // Internal pull-up
             PULL_DOWN   // Internal pull-down
         };
         
-        LimitSwitch(std::string label, uint8_t pin, double fixed_pos, std::vector<std::string> map_to={}, PullMode mode = PullMode::EXTERNAL);
+        LimitSwitch(std::string label, uint8_t pin, double fixed_pos, std::vector<std::string> map_to={}, PullMode mode = PullMode::PULL_UP);
 
         bool get_state() const;
         uint8_t get_pin() const;
@@ -26,9 +27,13 @@ class LimitSwitch{
         std::vector<std::string> get_mapping() const;
         const std::string& label() const;
 
+        bool is_active_low() const;
+
+
 
     private:
         const double fixed_position_;
+        PullMode pull_mode_;
         uint8_t pin_;
         std::vector<std::string> mapping_;
         std::string label_;
