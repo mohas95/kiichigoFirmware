@@ -31,7 +31,7 @@ class LimitSwitch{
         const double fixed_position_;
         uint8_t pin_;
         std::vector<std::string> mapping_;
-        std::string label_
+        std::string label_;
 };
 
 

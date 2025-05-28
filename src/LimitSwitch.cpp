@@ -33,14 +33,14 @@ uint8_t LimitSwitch::get_pin() const{
     return pin_;
 }
 
-doube LimitSwitch::get_fixed_position() const{
+double LimitSwitch::get_fixed_position() const{
     return fixed_position_; 
 }
 
-std::vector<std::string> LimitSwitchL::get_mapping() const{
+std::vector<std::string> LimitSwitch::get_mapping() const{
     return mapping_;
 }
 
-const std::string& label() const{
+const std::string& LimitSwitch::label() const{
     return label_;
 }

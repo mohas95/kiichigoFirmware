@@ -26,7 +26,7 @@ int main()
     printf("USB Serial connected!\n");
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
-    LimitSwitch home_switch("home", 24, 0, {"x", "y"}, PullMode::PULL_UP);
+    LimitSwitch home_switch("home", 24, 0, {"x", "y"}, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper1("x", stepper_driver1, 200, 100);
 
     TB67S128FTG stepper_driver2(6, 7, 8, 9, 10, 11, StepperDriver::StepMode::QUARTER);

@@ -39,9 +39,7 @@ class MotionPlanner{
         std::queue<std::function<void()>> action_queue_;
         std::unordered_map<std::string, StepperMotor*> stepper_motors_;
         std::unordered_map<std::string, LimitSwitch*> limit_switches_;
-        std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;
-        std::vector<LimitSwitch*> limit_switches_;
-        
+        std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;        
 
 };
 
