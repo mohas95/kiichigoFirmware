@@ -130,7 +130,9 @@ void MotionPlanner::loop_forever(){
             
             while(true){
 
-                request_action();
+                if(!interupt_flag_){
+                    request_action();
+                }
 
                 bool busy = update_actions();
 
@@ -388,8 +390,9 @@ void MotionPlanner::register_commands_(){
         }else{
             if(interupt_flag_){
                 LOG_WARN("ANOTHER INTERUPT ACTION IS IN PROGRESS CANNOT PERFORM ACTION: %s\n", full_line.c_str());
+             }else{
+                LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
              }
-            LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
         }
 
     };
