@@ -107,6 +107,46 @@ int main()
 }
 ```
 
+Using the LimitSwitch Library for abstracted monitoring of limit switches
+``` cpp
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "LimitSwitch.h"
+
+
+int main()
+{
+    stdio_init_all();
+
+    // Wait for USB serial to be connected
+    while (!stdio_usb_connected()) {
+        sleep_ms(100);
+    }
+
+    // Print a message to the USB serial
+    printf("USB Serial connected!\n");
+
+    LimitSwitch home_switch( "home", // std::string label 
+                             18, // uint8_t pin
+                             0, // double fixed_position
+                             {"x", "y"}, //std::vector<std::string> map_to={}  used to map motor labels to limit switch for motionPlanner
+                             LimitSwitch::PullMode::PULL_UP // PullMode mode = PullMode::PULL_UP    options: PULL_UP, PULL_DOWN, EXTERNAL_UP, EXTERNAL_DOWN
+                             );
+
+
+    while (true)
+    {
+        bool state = home_switch.get_state();
+        printf("%s\n", state ? "button Pressed" : "not pressed");
+        sleep_ms(1);
+    }
+    
+
+    printf("Done!\n");
+    return 0;
+}
+```
+
 Concurrent Multi-motor operation the MotionPlanner package
 ``` cpp
 #include <stdio.h>
