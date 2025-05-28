@@ -30,6 +30,7 @@ class StepperDriver {
         virtual uint8_t get_pulse_width() =0;
         virtual StepMode get_stepMode() = 0;
         virtual bool get_standbyMode() = 0;
+        virtual bool get_direction() const =0;
 
         virtual void home() = 0;
         virtual int32_t get_step_tracker() = 0;

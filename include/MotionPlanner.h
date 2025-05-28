@@ -1,6 +1,7 @@
 #ifndef MotionPlanner_H
 #define MotionPlanner_H
 #include "StepperMotor.h"
+#include "LimitSwitch.h"
 #include <vector>
 #include <unordered_map>
 #include <queue>
@@ -10,6 +11,7 @@
 
 struct MotionConfig{
     std::vector<StepperMotor*> stepper_motors={};
+    std::vector<LimitSwitch*> limit_switches={};
 };
 
 
@@ -19,6 +21,8 @@ class MotionPlanner{
         MotionPlanner(const MotionConfig& config);
 
         std::string read_serial_line();
+        void request_limit_switch_action();
+        void output_states();
         bool update_actions();
         void loop_forever();
         void request_action();
@@ -34,8 +38,9 @@ class MotionPlanner{
 
         std::queue<std::function<void()>> action_queue_;
         std::unordered_map<std::string, StepperMotor*> stepper_motors_;
-        std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;
-        
+        std::unordered_map<std::string, LimitSwitch*> limit_switches_;
+        std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;        
+        bool interupt_flag_;
 
 };
 

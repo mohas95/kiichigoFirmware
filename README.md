@@ -4,7 +4,8 @@
 The goal of this project is to make a stepper motor motion firmware for RP2040/RP2350-based microcontroller. This will include: 
 - a user-friendly library for abstracting stepper motor control for major stepper motor drivers.
 - Simple motion planning for synchronous multi-axis machines such as CNC or 3D Printer
-- Compatibility with G-code
+- Compatibility with G-code (in progress, not yet implemented)
+- includes auxiliary functionality for limit switches
 
 ## Example usage
 ### motor library usage
@@ -115,6 +116,8 @@ Concurrent Multi-motor operation the MotionPlanner package
 #include "TB67S128FTG.h"
 #include "StepperMotor.h"
 #include "MotionPlanner.h"
+#include "LimitSwitch.h"
+
 
 MotionConfig config; //struct for configuring the motors to be used in the MotionPlanner object
 
@@ -131,9 +134,15 @@ int main()
     printf("USB Serial connected!\n");
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
+    LimitSwitch home_switch("home", 18, 0, {"x", "y"}, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper1("x", stepper_driver1, 200, 100);
 
+    TB67S128FTG stepper_driver2(6, 7, 8, 9, 10, 11, StepperDriver::StepMode::QUARTER);
+    StepperMotor stepper2("y", stepper_driver2, 200, 100);
+
     config.stepper_motors={&stepper1}; // declare all stepper motors to be controlled by the MotionPlanner object in the the MotionConfig struct;
+    config.limit_switches = {&home_switch};// declare all limit switches to be monitored by the MotionPlanner object in the the MotionConfig struct;
+
 
     MotionPlanner stepper_controller(config); // instantiate the MotionPlanner
 
@@ -141,13 +150,13 @@ int main()
     stepper_controller.loop_forever(); //continous action request operation through serial Monitor, using the FIFO principle (this is blocking)
     /*Serial Command List: 
     
-        1. MOVE <motorlabel1>,<revolutions> <motorlabel2><revolutions> ...: This command sets the number of revolutions that each motor in the motion planner should make, currently only accepts int (ex. "MOVE x,100 y,-100 z,10")
+        1. MOVE <motorlabel1>,<revolutions> <motorlabel2>,<revolutions> ...: This command sets the number of revolutions that each motor in the motion planner should make, currently only accepts int (ex. "MOVE x,100 y,-100 z,10")
         
-        2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`><`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts double (ex. "SPEED x,100.0 y,200.0 z,50.0")
+        2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`>,<`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts double (ex. "SPEED x,100.0 y,200.0 z,50.0")
         
-        3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`><`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
+        3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`>,<`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
 
-        5. HIT <`motorlabel1`>,<`set_position`> <`motorlabel2`><`set_position`> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position input
+        5. HIT <`motorlabel1`>,<`set_position`> <`motorlabel2`>,<`set_position`> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position input. It also revolves 1 revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch
         
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
     */
@@ -181,6 +190,7 @@ All kinds of feedback and contributions are welcome.
 - [TB67S128FTG](https://www.pololu.com/product/2998) Motor Driver Support added inherets from StepperDriver.
 - StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control, position tracking. Dependent on StepperDriver class. 
 - Logging module added to simplify displaying various levels of messages on Serial Monitor.
+- support for limit switches
 - Multi-Motor Control with the MotionPlanner Package.
     - Current Functionality is to receive commands from Serial USB 
     - Concurrent operation with the loop_forever() method (blocking)
@@ -189,5 +199,5 @@ All kinds of feedback and contributions are welcome.
         2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`><`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts double (ex. "SPEED x,100.0 y,200.0 z,50.0")
         3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`><`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
         4. POSITION (in progress)
-        5. HIT <`motorlabel1`>,<`set_position`> <`motorlabel2`><`set_position`> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position input
+        5. HIT <`motorlabel1`>,<`set_position`> <`motorlabel2`><`set_position`> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position input.It also revolves 1 revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")

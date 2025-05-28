@@ -11,9 +11,44 @@ MotionPlanner::MotionPlanner(const MotionConfig& config) {
         stepper_motors_[stepper->label()] = stepper; 
     }
 
+    for (LimitSwitch* limit_switch : config.limit_switches){
+        limit_switches_[limit_switch->label()]=limit_switch;
+    }
+
     register_commands_();
 
 }
+
+void MotionPlanner::output_states() {
+
+    std::string state_str;
+
+
+
+}
+
+void MotionPlanner::request_limit_switch_action(){
+
+    for (const auto&[label, limit_switch]: limit_switches_){
+        
+        if(limit_switch->get_state()){
+            
+            std::ostringstream motors_to_stop;
+            
+            for(std::string motor_label : limit_switch->get_mapping()) {
+
+                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() <<" ";
+
+            }
+
+            std::istringstream iss(motors_to_stop.str());
+
+            command_handlers_["HIT"](iss);
+        }
+    }
+
+}
+
 
 
 std::string MotionPlanner::read_serial_line() {
@@ -42,6 +77,7 @@ std::string MotionPlanner::read_serial_line() {
 
 void MotionPlanner::request_action(){
 
+    request_limit_switch_action();
     std::string line = read_serial_line();
 
     if (!line.empty()) {
@@ -105,6 +141,7 @@ void MotionPlanner::loop_forever(){
         }
 
         sleep_ms(1);
+        interupt_flag_= false;
         
     }
 
@@ -321,12 +358,21 @@ void MotionPlanner::register_commands_(){
             }
         }
 
-        if(!command_dict.empty()){
+        if(!command_dict.empty() && !interupt_flag_){
+
+            interupt_flag_=true;
 
             for(const auto& [label, value] : command_dict){
 
-                stepper_motors_[label]->revolve(0); // sets all steps to zero
+                // bool dir = stepper_motors_[label]->get_direction();
+                // stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position(value);
+
+                if(stepper_motors_[label]->get_direction()){
+                    stepper_motors_[label]->revolve(-1); 
+                }else{
+                    stepper_motors_[label]->revolve(1); 
+                }
 
             }
 
@@ -340,6 +386,9 @@ void MotionPlanner::register_commands_(){
             LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
 
         }else{
+            if(interupt_flag_){
+                LOG_WARN("ANOTHER INTERUPT ACTION IS IN PROGRESS CANNOT PERFORM ACTION: %s\n", full_line.c_str());
+             }
             LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
         }
 
