@@ -33,6 +33,7 @@ int main()
     StepperMotor stepper2("y", stepper_driver2, 200, 100);
 
     config.stepper_motors={&stepper1, &stepper2};
+    config.limit_switches = {&home_switch};
 
 
 
