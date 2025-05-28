@@ -8,6 +8,7 @@
 
 
 
+
 class StepperMotor {
     public:
         static constexpr std::array<uint8_t, 8> STEP_MODE_MULTIPLIER = {{

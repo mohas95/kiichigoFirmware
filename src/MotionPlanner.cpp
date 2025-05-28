@@ -11,9 +11,44 @@ MotionPlanner::MotionPlanner(const MotionConfig& config) {
         stepper_motors_[stepper->label()] = stepper; 
     }
 
+    for (LimitSwitch* limit_switch : config.limit_switches){
+        limit_switches_[limit_switch->label()]=limit_switch;
+    }
+
     register_commands_();
 
 }
+
+void MotionPlanner::output_states() {
+
+    std::string state_str;
+
+
+
+}
+
+void MotionPlanner::request_limit_switch_action(){
+
+    for (const auto&[label, limit_switch]: limit_switches_){
+        
+        if(limit_switch->get_state()){
+            
+            std::ostringstream motors_to_stop;
+            
+            for(std::string motor_label : limit_switch->get_mapping()) {
+
+                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() <<" ";
+
+            }
+
+            std::istringstream iss(motors_to_stop.str());
+
+            command_handlers_["HIT"](iss);
+        }
+    }
+
+}
+
 
 
 std::string MotionPlanner::read_serial_line() {
@@ -42,6 +77,7 @@ std::string MotionPlanner::read_serial_line() {
 
 void MotionPlanner::request_action(){
 
+    request_limit_switch_action();
     std::string line = read_serial_line();
 
     if (!line.empty()) {

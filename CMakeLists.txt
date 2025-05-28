@@ -48,6 +48,7 @@ add_executable( ${PROJECT_NAME}
             src/StepperDriver.cpp
             src/TB67S128FTG.cpp
             src/StepperMotor.cpp
+            src/LimitSwitch.cpp
             src/MotionPlanner.cpp )
 
 pico_set_program_name(${PROJECT_NAME} "kiichigoFirmware")
