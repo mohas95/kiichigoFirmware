@@ -24,7 +24,7 @@ LimitSwitch::LimitSwitch( std::string label,
         case PullMode::EXTERNAL_DOWN:
             break;
     }
-    }
+    
 
 }
 
