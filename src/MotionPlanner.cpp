@@ -75,9 +75,8 @@ std::string MotionPlanner::read_serial_line() {
 }
 
 
-void MotionPlanner::request_action(){
+void MotionPlanner::request_serial_action(){
 
-    request_limit_switch_action();
     std::string line = read_serial_line();
 
     if (!line.empty()) {
@@ -118,8 +117,9 @@ bool MotionPlanner::update_actions(){
 void MotionPlanner::loop_forever(){
     
     while (true){
-    
-        request_action();
+        
+        request_limit_switch_action();
+        request_serial_action();
 
         while(!action_queue_.empty()){
 
@@ -130,8 +130,10 @@ void MotionPlanner::loop_forever(){
             
             while(true){
 
+                request_limit_switch_action();
+
                 if(!interupt_flag_){
-                    request_action();
+                    request_serial_action();
                 }
 
                 bool busy = update_actions();

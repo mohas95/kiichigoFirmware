@@ -25,7 +25,7 @@ class MotionPlanner{
         void output_states();
         bool update_actions();
         void loop_forever();
-        void request_action();
+        void request_serial_action();
     
     private:
 
