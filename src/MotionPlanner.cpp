@@ -364,6 +364,12 @@ void MotionPlanner::register_commands_(){
                 stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position(value);
 
+                if(stepper_motors_[label]->get_direction()){
+                    stepper_motors_[label]->revolve(-1); 
+                }else{
+                    stepper_motors_[label]->revolve(1); 
+                }
+
             }
 
             // Clear pending commands

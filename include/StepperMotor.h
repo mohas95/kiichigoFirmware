@@ -29,6 +29,7 @@ class StepperMotor {
 
         void revolve(double revolutions=1.0);
         void set_speed(double rpm=200);
+        bool get_direction();
         void home();
         std::tuple<int32_t, double>  update_position();
         void update_position(double);

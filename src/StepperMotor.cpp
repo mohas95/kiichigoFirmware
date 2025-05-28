@@ -51,6 +51,10 @@ void StepperMotor::set_speed(double rpm){
 
 }
 
+bool StepperMotor::get_direction(){
+    return driver_.get_direction();
+}
+
 std::tuple<int32_t, double> StepperMotor::update_position(){
     position_step_ = driver_.get_step_tracker();
     position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);

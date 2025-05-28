@@ -78,6 +78,12 @@ void TB67S128FTG::set_direction(bool direction){
     // LOG_INFO("direction set to: %s\n", direction ? "CW" : "CCW");
 }
 
+bool TB67S128FTG::get_direction() const{    
+
+    return dir_state_;
+
+}
+
 
 void TB67S128FTG::set_pulse_interval(uint32_t pulse_interval){
     pulse_interval_=pulse_interval;
