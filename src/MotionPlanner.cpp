@@ -361,7 +361,7 @@ void MotionPlanner::register_commands_(){
 
             for(const auto& [label, value] : command_dict){
 
-                stepper_motors_[label]->revolve(0); // sets all steps to zero
+                // stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position(value);
 
                 if(stepper_motors_[label]->get_direction()){
