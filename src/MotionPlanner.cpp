@@ -371,7 +371,7 @@ void MotionPlanner::register_commands_(){
 
             for(const auto& [label, value] : command_dict){
 
-                if(std::find(disable_action_for_.begin(), disable_action_for_.end(), label)){ // Interupt should run once
+                if(std::find(disable_action_for_.begin(), disable_action_for_.end(), label)!=disable_action_for_.end()){ // Interupt should run once
                     LOG_WARN("INTERUPT ACTION IN PROGRESS for: %s\n", label.c_str());
                 }else{
 
