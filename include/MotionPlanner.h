@@ -41,6 +41,7 @@ class MotionPlanner{
         std::unordered_map<std::string, LimitSwitch*> limit_switches_;
         std::unordered_map<std::string, std::function<void(std::istringstream&)>> command_handlers_;        
         bool interupt_flag_;
+        std::vector<std::string> disable_action_for_;
 
 };
 

@@ -144,8 +144,11 @@ void MotionPlanner::loop_forever(){
 
         }
 
-        sleep_ms(1);
         interupt_flag_= false;
+        if(!disable_action_for_.empty()){disable_action_for_.clear();}
+
+        sleep_ms(1);
+
         
     }
 
@@ -362,20 +365,27 @@ void MotionPlanner::register_commands_(){
             }
         }
 
-        if(!command_dict.empty() && !interupt_flag_){
+        if(!command_dict.empty()){ //  && !interupt_flag_
 
             interupt_flag_=true;
 
             for(const auto& [label, value] : command_dict){
 
-                // bool dir = stepper_motors_[label]->get_direction();
-                // stepper_motors_[label]->revolve(0); // sets all steps to zero
-                stepper_motors_[label]->update_position(value);
-
-                if(stepper_motors_[label]->get_direction()){
-                    stepper_motors_[label]->revolve(-1); 
+                if(std::find(disable_action_for_.begin(), disable_action_for_.end(), label)){ // Interupt should run once
+                    LOG_WARN("INTERUPT ACTION IN PROGRESS for: %s\n", label.c_str());
                 }else{
-                    stepper_motors_[label]->revolve(1); 
+
+                    stepper_motors_[label]->update_position(value);
+
+                    if(stepper_motors_[label]->get_direction()){
+                        stepper_motors_[label]->revolve(-1); 
+                    }else{
+                        stepper_motors_[label]->revolve(1); 
+                    }
+                    disable_action_for_.push_back(label); //once ran disable so that it doesnt interfere
+
+                    LOG_INFO("INTERUPT: HIT %s,%0.2f\n", label.c_str(),value);
+
                 }
 
             }
@@ -385,16 +395,10 @@ void MotionPlanner::register_commands_(){
             std::swap(action_queue_, empty);
 
             // Flush any buffered serial input
-            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
-
-            LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
+            // while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
 
         }else{
-            if(interupt_flag_){
-                LOG_WARN("ANOTHER INTERUPT ACTION IS IN PROGRESS CANNOT PERFORM ACTION: %s\n", full_line.c_str());
-             }else{
-                LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
-             }
+            LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
         }
 
     };
