@@ -196,7 +196,7 @@ int main()
         
         3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`>,<`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
 
-        5. HIT <`motorlabel1`>,<`set_position`> <`motorlabel2`>,<`set_position`> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position input. It also revolves 1 revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch
+        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`><'reverse_after_hit'> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
         
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
     */

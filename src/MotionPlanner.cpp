@@ -5,7 +5,7 @@
 #include <cctype>
 
 
-MotionPlanner::MotionPlanner(const MotionConfig& config) {
+MotionPlanner::MotionPlanner(const MotionConfig& config, uint16_t log_rate) : log_rate_(log_rate) {
     
     for (StepperMotor* stepper : config.stepper_motors){
         stepper_motors_[stepper->label()] = stepper; 
@@ -17,17 +17,57 @@ MotionPlanner::MotionPlanner(const MotionConfig& config) {
 
     register_commands_();
 
+    last_log_time_us_ = time_us_64();
+
 }
 
 void MotionPlanner::output_states() {
 
-    std::string state_str;
+    uint64_t time_now = time_us_64();
+    uint64_t time_diff = (time_now-last_log_time_us_)/1000; //in ms
 
 
+    if (time_diff>=log_rate_){
+        std::ostringstream output_state;
+
+        for(const auto&[label, limit_switch]: limit_switches_){
+
+            std::string switch_state = limit_switch->get_state() ? "activated": "off";
+
+            output_state << label << "(limit_switch):" << switch_state << " ";
+
+        }
+
+        for (const auto&[label, motor]: stepper_motors_){
+
+            if(!motor->get_standbyMode()){
+
+                std::string dir = motor->get_direction() ? "+": "-";
+
+                output_state << label << "(StepperMotor):" << motor->get_speed() << "(rpm)," 
+                                                            <<  dir << ","
+                                                            << motor->get_position_rev() << "(rev),"
+                                                            << motor->get_position_step() << "(steps),"
+                                                            << " ";
+
+            }else{
+                output_state << label << "(StepperMotor):" << "Standby"<< " ";
+            }
+
+
+        }
+
+        output_state_str_=output_state.str();
+        
+        LOG_OUTPUT("%s\n", output_state_str_.c_str());
+
+        last_log_time_us_ = time_now;
+
+    }
 
 }
 
-void MotionPlanner::request_limit_switch_action(){
+void MotionPlanner::request_limit_switch_action(bool with_reverse){
 
     for (const auto&[label, limit_switch]: limit_switches_){
         
@@ -37,7 +77,9 @@ void MotionPlanner::request_limit_switch_action(){
             
             for(std::string motor_label : limit_switch->get_mapping()) {
 
-                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() <<" ";
+                double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
+
+                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
 
             }
 
@@ -75,9 +117,8 @@ std::string MotionPlanner::read_serial_line() {
 }
 
 
-void MotionPlanner::request_action(){
+void MotionPlanner::request_serial_action(){
 
-    request_limit_switch_action();
     std::string line = read_serial_line();
 
     if (!line.empty()) {
@@ -118,8 +159,10 @@ bool MotionPlanner::update_actions(){
 void MotionPlanner::loop_forever(){
     
     while (true){
-    
-        request_action();
+        
+        request_limit_switch_action(false);
+        request_serial_action();
+        output_states();
 
         while(!action_queue_.empty()){
 
@@ -130,9 +173,15 @@ void MotionPlanner::loop_forever(){
             
             while(true){
 
-                request_action();
+                request_limit_switch_action();
+
+                if(!interupt_flag_){
+                    request_serial_action();
+                }
 
                 bool busy = update_actions();
+                output_states();
+
 
                 if(!busy){break;}
 
@@ -140,8 +189,11 @@ void MotionPlanner::loop_forever(){
 
         }
 
-        sleep_ms(1);
         interupt_flag_= false;
+        if(!disable_action_for_.empty()){disable_action_for_.clear();}
+
+        sleep_ms(1);
+
         
     }
 
@@ -324,33 +376,40 @@ void MotionPlanner::register_commands_(){
 
     command_handlers_["HIT"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
-            "HIT X,10.0 Y,200.5 Z,-30.0"
+            "HIT X,10.0,0 Y,200.5,1 Z,-30.0,2"
             This is an INTERUPT command 
         */
+
+       struct CommandValues{
+            double value;
+            double rev_value;
+       };
+
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
-        std::unordered_map<std::string, double> command_dict;
+        std::unordered_map<std::string, CommandValues> command_dict;
 
         while(iss>>token){
 
             if (token.length() <2 ) {continue;}
 
             std::istringstream command_stream(token);
-            std::string label, value_str;
+            std::string label, value_str, rev_value_str;
 
-            if(std::getline(command_stream, label, ',') && std::getline(command_stream, value_str)){
+            if(std::getline(command_stream, label, ',') && std::getline(command_stream, value_str, ',') && std::getline(command_stream, rev_value_str)){
                 if(stepper_motors_.find(label) == stepper_motors_.end()){
                     LOG_WARN("Unknown motor: %s\n",label.c_str());
                     continue;
                 }
 
-                if (value_str.empty() || (!is_float_(value_str))) {
+                if (value_str.empty() || (!is_float_(value_str)) || rev_value_str.empty() || (!is_float_(rev_value_str))) {
                     LOG_WARN("Invalid input: %s\n", value_str.c_str());
                     continue;
                 }
 
                 double value = std::stod(value_str);
-                command_dict[label] = value;
+                double rev_value = std::stod(rev_value_str);
+                command_dict[label] = {value, rev_value};
 
             }else{
                 LOG_WARN("Invalid token: %s\n", token.c_str());
@@ -358,20 +417,27 @@ void MotionPlanner::register_commands_(){
             }
         }
 
-        if(!command_dict.empty() && !interupt_flag_){
+        if(!command_dict.empty()){ //  && !interupt_flag_
 
             interupt_flag_=true;
 
-            for(const auto& [label, value] : command_dict){
+            for(const auto& [label, command] : command_dict){
 
-                // bool dir = stepper_motors_[label]->get_direction();
-                // stepper_motors_[label]->revolve(0); // sets all steps to zero
-                stepper_motors_[label]->update_position(value);
-
-                if(stepper_motors_[label]->get_direction()){
-                    stepper_motors_[label]->revolve(-1); 
+                if(std::find(disable_action_for_.begin(), disable_action_for_.end(), label)!=disable_action_for_.end()){ // Interupt should run once
+                    LOG_WARN("INTERUPT ACTION IN PROGRESS for: %s\n", label.c_str());
                 }else{
-                    stepper_motors_[label]->revolve(1); 
+
+                    stepper_motors_[label]->update_position(command.value);
+
+                    if(stepper_motors_[label]->get_direction()){
+                        stepper_motors_[label]->revolve(-command.rev_value); 
+                    }else{
+                        stepper_motors_[label]->revolve(command.rev_value); 
+                    }
+                    disable_action_for_.push_back(label); //once ran disable so that it doesnt interfere
+
+                    LOG_INFO("INTERUPT: HIT %s,pos: %0.2f, reversing: %0.2f revs\n", label.c_str(),command.value, command.rev_value);
+
                 }
 
             }
@@ -381,14 +447,9 @@ void MotionPlanner::register_commands_(){
             std::swap(action_queue_, empty);
 
             // Flush any buffered serial input
-            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
-
-            LOG_INFO("INTERUPT: HIT %s\n", full_line.c_str());
+            // while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
 
         }else{
-            if(interupt_flag_){
-                LOG_WARN("ANOTHER INTERUPT ACTION IS IN PROGRESS CANNOT PERFORM ACTION: %s\n", full_line.c_str());
-             }
             LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
         }
 

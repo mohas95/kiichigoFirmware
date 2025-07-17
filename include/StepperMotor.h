@@ -29,15 +29,20 @@ class StepperMotor {
 
         void revolve(double revolutions=1.0);
         void set_speed(double rpm=200);
-        bool get_direction();
         void home();
         std::tuple<int32_t, double>  update_position();
         void update_position(double);
         bool step();
         void set_standbyMode(bool);
+
+        bool get_direction();
+        double get_speed() const;
+        int32_t get_position_step() const;
+        double get_position_rev() const;
+        bool get_standbyMode() const;
+        const std::string& label() const;
         bool active();
 
-        const std::string& label() const;
 
     private:
         std::string label_;

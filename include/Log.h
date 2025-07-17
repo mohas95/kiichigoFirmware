@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 enum class LogLevel {
+    OUTPUT,
     ERROR,
     WARN,
     INFO,
@@ -13,6 +14,7 @@ enum class LogLevel {
 void log_print(LogLevel level, const char* format, ...);
 void log_set_level(LogLevel level);
 
+#define LOG_OUTPUT(...) log_print(LogLevel::OUTPUT, __VA_ARGS__)
 #define LOG_ERROR(...) log_print(LogLevel::ERROR, __VA_ARGS__)
 #define LOG_WARN(...)  log_print(LogLevel::WARN,  __VA_ARGS__)
 #define LOG_INFO(...)  log_print(LogLevel::INFO,  __VA_ARGS__)
