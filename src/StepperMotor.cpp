@@ -104,3 +104,19 @@ bool StepperMotor::step(){
 const std::string& StepperMotor::label() const{
     return label_;
 };
+
+double StepperMotor::get_speed() const{
+    return speed_;
+}
+
+int32_t StepperMotor::get_position_step() const{
+    return position_step_;
+}
+
+double StepperMotor::get_position_rev() const{
+    return position_revolutions_;
+}
+
+bool StepperMotor::get_standbyMode() const{
+    return driver_.get_standbyMode();
+}

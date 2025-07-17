@@ -47,7 +47,7 @@ int main()
     // }
     
 
-    MotionPlanner stepper_controller(config);
+    MotionPlanner stepper_controller(config,250);
 
 
     stepper_controller.loop_forever(); //this is blocking

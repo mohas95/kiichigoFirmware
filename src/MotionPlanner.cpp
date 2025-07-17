@@ -5,7 +5,7 @@
 #include <cctype>
 
 
-MotionPlanner::MotionPlanner(const MotionConfig& config) {
+MotionPlanner::MotionPlanner(const MotionConfig& config, uint16_t log_rate) : log_rate_(log_rate) {
     
     for (StepperMotor* stepper : config.stepper_motors){
         stepper_motors_[stepper->label()] = stepper; 
@@ -17,13 +17,53 @@ MotionPlanner::MotionPlanner(const MotionConfig& config) {
 
     register_commands_();
 
+    last_log_time_us_ = time_us_64();
+
 }
 
 void MotionPlanner::output_states() {
 
-    std::string state_str;
+    uint64_t time_now = time_us_64();
+    uint64_t time_diff = (time_now-last_log_time_us_)/1000; //in ms
 
 
+    if (time_diff>=log_rate_){
+        std::ostringstream output_state;
+
+        for(const auto&[label, limit_switch]: limit_switches_){
+
+            std::string switch_state = limit_switch->get_state() ? "activated": "off";
+
+            output_state << label << "(limit_switch):" << switch_state << " ";
+
+        }
+
+        for (const auto&[label, motor]: stepper_motors_){
+
+            if(!motor->get_standbyMode()){
+
+                std::string dir = motor->get_direction() ? "+": "-";
+
+                output_state << label << "(StepperMotor):" << motor->get_speed() << "(rpm)," 
+                                                            <<  dir << ","
+                                                            << motor->get_position_rev() << "(rev),"
+                                                            << motor->get_position_step() << "(steps),"
+                                                            << " ";
+
+            }else{
+                output_state << label << "(StepperMotor):" << "Standby"<< " ";
+            }
+
+
+        }
+
+        output_state_str_=output_state.str();
+        
+        LOG_OUTPUT("%s\n", output_state_str_.c_str());
+
+        last_log_time_us_ = time_now;
+
+    }
 
 }
 
@@ -122,6 +162,7 @@ void MotionPlanner::loop_forever(){
         
         request_limit_switch_action(false);
         request_serial_action();
+        output_states();
 
         while(!action_queue_.empty()){
 
@@ -139,6 +180,8 @@ void MotionPlanner::loop_forever(){
                 }
 
                 bool busy = update_actions();
+                output_states();
+
 
                 if(!busy){break;}
 
