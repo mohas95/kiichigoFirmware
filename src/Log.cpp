@@ -12,6 +12,7 @@ void log_print(LogLevel level, const char* format, ...){
     const char* levelStr = "";
 
     switch(level){
+        case LogLevel::OUTPUT: levelStr = "[OUTPUT] "; break;
         case LogLevel::ERROR: levelStr = "[ERROR] "; break;
         case LogLevel::WARN: levelStr = "[WARN] "; break;
         case LogLevel::INFO: levelStr = "[INFO] "; break;

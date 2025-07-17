@@ -14,7 +14,7 @@ int main()
 {
     stdio_init_all();
 
-    log_set_level(LogLevel::INFO);
+    log_set_level(LogLevel::ERROR);
 
 
     // Wait for USB serial to be connected
