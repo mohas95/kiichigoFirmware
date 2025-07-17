@@ -4,9 +4,11 @@ LimitSwitch::LimitSwitch( std::string label,
                           uint8_t pin,
                           double fixed_pos,
                           std::vector<std::string> map_to,
+                          uint8_t reverse_value,
                           PullMode mode ) : label_(label),
                                             fixed_position_(fixed_pos),
                                             pin_(pin),
+                                            reverse_value_(reverse_value),
                                             pull_mode_(mode),
                                             mapping_(map_to){
 
@@ -38,6 +40,10 @@ bool LimitSwitch::get_state() const{
 
 uint8_t LimitSwitch::get_pin() const{
     return pin_;
+}
+
+uint8_t LimitSwitch::get_reverse_value() const{
+    return reverse_value_;
 }
 
 double LimitSwitch::get_fixed_position() const{

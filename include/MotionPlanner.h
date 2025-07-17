@@ -21,7 +21,7 @@ class MotionPlanner{
         MotionPlanner(const MotionConfig& config);
 
         std::string read_serial_line();
-        void request_limit_switch_action();
+        void request_limit_switch_action(bool with_reverse=true);
         void output_states();
         bool update_actions();
         void loop_forever();

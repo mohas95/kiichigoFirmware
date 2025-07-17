@@ -27,7 +27,7 @@ void MotionPlanner::output_states() {
 
 }
 
-void MotionPlanner::request_limit_switch_action(){
+void MotionPlanner::request_limit_switch_action(bool with_reverse){
 
     for (const auto&[label, limit_switch]: limit_switches_){
         
@@ -37,7 +37,9 @@ void MotionPlanner::request_limit_switch_action(){
             
             for(std::string motor_label : limit_switch->get_mapping()) {
 
-                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() <<" ";
+                double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
+
+                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
 
             }
 
@@ -118,7 +120,7 @@ void MotionPlanner::loop_forever(){
     
     while (true){
         
-        // request_limit_switch_action();
+        request_limit_switch_action(false);
         request_serial_action();
 
         while(!action_queue_.empty()){
@@ -331,33 +333,40 @@ void MotionPlanner::register_commands_(){
 
     command_handlers_["HIT"] = [&](std::istringstream& iss) {
         /*This command parses commands from serial with this format:
-            "HIT X,10.0 Y,200.5 Z,-30.0"
+            "HIT X,10.0,0 Y,200.5,1 Z,-30.0,2"
             This is an INTERUPT command 
         */
+
+       struct CommandValues{
+            double value;
+            double rev_value;
+       };
+
         std::string full_line = iss.str().substr(iss.tellg());
         std::string token;
-        std::unordered_map<std::string, double> command_dict;
+        std::unordered_map<std::string, CommandValues> command_dict;
 
         while(iss>>token){
 
             if (token.length() <2 ) {continue;}
 
             std::istringstream command_stream(token);
-            std::string label, value_str;
+            std::string label, value_str, rev_value_str;
 
-            if(std::getline(command_stream, label, ',') && std::getline(command_stream, value_str)){
+            if(std::getline(command_stream, label, ',') && std::getline(command_stream, value_str, ',') && std::getline(command_stream, rev_value_str)){
                 if(stepper_motors_.find(label) == stepper_motors_.end()){
                     LOG_WARN("Unknown motor: %s\n",label.c_str());
                     continue;
                 }
 
-                if (value_str.empty() || (!is_float_(value_str))) {
+                if (value_str.empty() || (!is_float_(value_str)) || rev_value_str.empty() || (!is_float_(rev_value_str))) {
                     LOG_WARN("Invalid input: %s\n", value_str.c_str());
                     continue;
                 }
 
                 double value = std::stod(value_str);
-                command_dict[label] = value;
+                double rev_value = std::stod(rev_value_str);
+                command_dict[label] = {value, rev_value};
 
             }else{
                 LOG_WARN("Invalid token: %s\n", token.c_str());
@@ -369,22 +378,22 @@ void MotionPlanner::register_commands_(){
 
             interupt_flag_=true;
 
-            for(const auto& [label, value] : command_dict){
+            for(const auto& [label, command] : command_dict){
 
                 if(std::find(disable_action_for_.begin(), disable_action_for_.end(), label)!=disable_action_for_.end()){ // Interupt should run once
                     LOG_WARN("INTERUPT ACTION IN PROGRESS for: %s\n", label.c_str());
                 }else{
 
-                    stepper_motors_[label]->update_position(value);
+                    stepper_motors_[label]->update_position(command.value);
 
                     if(stepper_motors_[label]->get_direction()){
-                        stepper_motors_[label]->revolve(-1); 
+                        stepper_motors_[label]->revolve(-command.rev_value); 
                     }else{
-                        stepper_motors_[label]->revolve(1); 
+                        stepper_motors_[label]->revolve(command.rev_value); 
                     }
                     disable_action_for_.push_back(label); //once ran disable so that it doesnt interfere
 
-                    LOG_INFO("INTERUPT: HIT %s,%0.2f\n", label.c_str(),value);
+                    LOG_INFO("INTERUPT: HIT %s,pos: %0.2f, reversing: %0.2f revs\n", label.c_str(),command.value, command.rev_value);
 
                 }
 
