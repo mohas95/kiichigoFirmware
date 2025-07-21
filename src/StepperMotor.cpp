@@ -26,7 +26,7 @@ StepperMotor::StepperMotor (std::string label,
 
 void StepperMotor::revolve(double revolutions){
 
-    if(!drive_.get_stanbyMode){
+    if(!driver_.get_standbyMode()){
     
         bool direction = revolutions>=0 ? true:false;
         driver_.set_direction(direction);
@@ -88,6 +88,7 @@ void StepperMotor::home(){
 
 void StepperMotor::set_standbyMode(bool active){
     driver_.set_standbyMode(active);
+    update_position();
     LOG_DEBUG("%s Standby Mode %s", label_.c_str(), active ?"enabled":"disabled");   
 
 }
