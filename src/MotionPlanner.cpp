@@ -177,6 +177,8 @@ void MotionPlanner::loop_forever(){
 
                 if(!interupt_flag_){
                     request_serial_action();
+                }else{
+                    while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {} // flush any incoming command in serial cache
                 }
 
                 bool busy = update_actions();
@@ -495,7 +497,7 @@ void MotionPlanner::register_commands_(){
             std::swap(action_queue_, empty);
 
             // Flush any buffered serial input
-            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
+            // while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
 
             LOG_INFO("INTERUPT: STOP %s\n", full_line.c_str());
 
