@@ -201,7 +201,7 @@ int main()
         
         3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`>,<`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
 
-        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`><'reverse_after_hit'> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
+        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`><'reverse_after_hit'> ... : This (flagged interupt) command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
         
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
     */
@@ -218,8 +218,7 @@ int main()
 - Commands are given through serial communication or through interrupts (via limit switch)
 - Each serial command is added to the event loop queue in a FIFO fashion. Serial and interrupt commands are requested throughout the event loop.
 - When the event loop is not performing an action, it will perform the next action in the queue (i.e. move, speed, standby). 
-- Interrupt commands (i.e hit or stop) will interrupt an action and trigger an interrupt flag, which clears the queue of actions (and any cached commands in the serial monitor) and will stop any requests for new serial commands.
-- When the interrupt action is finished, new commands can be sent again.
+- Interrupt commands (i.e stop) will interrupt an action, which clears the queue of actions but will remain open for new commands.  Flagged interrupts (i.e. hit) will do the same and trigger an interrupt flag which will clear any cached commands in the serial monitor and will stop any requests for new serial commands. When flagged interrupt action is finished, new commands can be sent again.
 - Feedback from the motors and limit switches are sent as output of the serial monitor at fixed intervals (set when instantiating the motionplanner class)
 
 
@@ -251,7 +250,7 @@ All kinds of feedback and contributions are welcome.
         2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`><`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts double (ex. "SPEED x,100.0 y,200.0 z,50.0")
         3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`><`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
         4. POSITION (in progress)
-        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`>,<'reverse_after_hit'> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
+        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`>,<'reverse_after_hit'> ... : This (flagged interupt) command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
     - Bugs to address: 
         - STOP commands after interrupt is hit

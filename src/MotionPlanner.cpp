@@ -486,7 +486,7 @@ void MotionPlanner::register_commands_(){
         }
 
         if(!command_vec.empty()){
-
+        
             for(const auto& label : command_vec){
                 stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position();
