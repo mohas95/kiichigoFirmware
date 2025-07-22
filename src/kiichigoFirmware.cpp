@@ -7,7 +7,6 @@
 #include "MotionPlanner.h"
 #include "LimitSwitch.h"
 
-
 MotionConfig config;
 
 int main()
@@ -38,17 +37,8 @@ int main()
 
     config.stepper_motors={&stepper1, &stepper2, &stepper3};
     config.limit_switches = {&home_switch};
-
-    // while (true)
-    // {
-    //     bool state = home_switch.get_state();
-    //     printf("%s\n", state ? "button Pressed" : "not pressed");
-    //     sleep_ms(1);
-    // }
     
-
     MotionPlanner stepper_controller(config,250);
-
 
     stepper_controller.loop_forever(); //this is blocking
 
