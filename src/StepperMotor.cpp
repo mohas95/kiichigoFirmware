@@ -25,17 +25,21 @@ StepperMotor::StepperMotor (std::string label,
 }
 
 void StepperMotor::revolve(double revolutions){
-    
-    bool direction = revolutions>=0 ? true:false;
-    driver_.set_direction(direction);
-    
-    LOG_DEBUG("%s direction set to: %s\n", label_.c_str(), direction ? "CW" : "CCW");
-    
-    uint32_t steps = static_cast<uint32_t>(std::round(std::abs(revolutions) * steps_per_rev_));
-    driver_.step_for(steps);
-    
-    LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), std::abs(revolutions));
 
+    if(!driver_.get_standbyMode()){
+    
+        bool direction = revolutions>=0 ? true:false;
+        driver_.set_direction(direction);
+        
+        LOG_DEBUG("%s direction set to: %s\n", label_.c_str(), direction ? "CW" : "CCW");
+        
+        uint32_t steps = static_cast<uint32_t>(std::round(std::abs(revolutions) * steps_per_rev_));
+        driver_.step_for(steps);
+        
+        LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), std::abs(revolutions));
+    }else{
+        LOG_DEBUG("%s is in standby mode", label_.c_str());
+    }
 }
 
 void StepperMotor::set_speed(double rpm){
@@ -69,6 +73,7 @@ void StepperMotor::update_position(double rev_pos){
     position_step_ = static_cast<int32_t>(std::round(rev_pos * static_cast<double>(steps_per_rev_)));
     position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);
 
+    driver_.set_step_tracker(position_step_);
     LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);
 }
 
@@ -83,6 +88,7 @@ void StepperMotor::home(){
 
 void StepperMotor::set_standbyMode(bool active){
     driver_.set_standbyMode(active);
+    update_position();
     LOG_DEBUG("%s Standby Mode %s", label_.c_str(), active ?"enabled":"disabled");   
 
 }

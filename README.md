@@ -130,6 +130,7 @@ int main()
                              18, // uint8_t pin
                              0, // double fixed_position
                              {"x", "y"}, //std::vector<std::string> map_to={}  used to map motor labels to limit switch for motionPlanner
+                             1, //uint8_t reverse_value how many revolutions to rotate in the opposite direction when limit switch is hit
                              LimitSwitch::PullMode::PULL_UP // PullMode mode = PullMode::PULL_UP    options: PULL_UP, PULL_DOWN, EXTERNAL_UP, EXTERNAL_DOWN
                              );
 
@@ -174,17 +175,21 @@ int main()
     printf("USB Serial connected!\n");
 
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
-    LimitSwitch home_switch("home", 18, 0, {"x", "y"}, LimitSwitch::PullMode::PULL_UP);
+    LimitSwitch home_switch("home", 18, 0, {"x"}, 1, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper1("x", stepper_driver1, 200, 100);
 
     TB67S128FTG stepper_driver2(6, 7, 8, 9, 10, 11, StepperDriver::StepMode::QUARTER);
     StepperMotor stepper2("y", stepper_driver2, 200, 100);
 
-    config.stepper_motors={&stepper1}; // declare all stepper motors to be controlled by the MotionPlanner object in the the MotionConfig struct;
-    config.limit_switches = {&home_switch};// declare all limit switches to be monitored by the MotionPlanner object in the the MotionConfig struct;
+    TB67S128FTG stepper_driver3(12, 13, 14, 15, 17, 16, StepperDriver::StepMode::QUARTER);
+    StepperMotor stepper3("z", stepper_driver3, 200, 100);
 
+    config.stepper_motors={&stepper1, &stepper2, &stepper3}; // declare all stepper motors to be controlled by the MotionPlanner object in the the MotionConfig struct;
+    config.limit_switches = {&home_switch}; // declare all limit switches to be monitored by the MotionPlanner object in the the MotionConfig struct;
 
-    MotionPlanner stepper_controller(config); // instantiate the MotionPlanner
+    // instantiate the MotionPlanner
+    MotionPlanner stepper_controller( config, //MotionConfig config: struct for configuring the motors to be used in the MotionPlanner object
+                                      250); //uint16_t log_rate: feedback output interval in milliseconds
 
 
     stepper_controller.loop_forever(); //continous action request operation through serial Monitor, using the FIFO principle (this is blocking)
@@ -196,7 +201,7 @@ int main()
         
         3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`>,<`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
 
-        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`><'reverse_after_hit'> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
+        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`><'reverse_after_hit'> ... : This (flagged interupt) command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
         
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
     */
@@ -208,7 +213,13 @@ int main()
 
 ```
 
+## Event loop logic
 
+- Commands are given through serial communication or through interrupts (via limit switch)
+- Each serial command is added to the event loop queue in a FIFO fashion. Serial and interrupt commands are requested throughout the event loop.
+- When the event loop is not performing an action, it will perform the next action in the queue (i.e. move, speed, standby). 
+- Interrupt commands (i.e stop) will interrupt an action, which clears the queue of actions but will remain open for new commands.  Flagged interrupts (i.e. hit) will do the same and trigger an interrupt flag which will clear any cached commands in the serial monitor and will stop any requests for new serial commands. When flagged interrupt action is finished, new commands can be sent again.
+- Feedback from the motors and limit switches are sent as output of the serial monitor at fixed intervals (set when instantiating the motionplanner class)
 
 
 ## Feedback
@@ -239,5 +250,8 @@ All kinds of feedback and contributions are welcome.
         2. SPEED <`motorlabel1`>,<`rpm`> <`motorlabel2`><`rpm`> ... : This command sets the number of speed of each motor in the motion planner, accepts double (ex. "SPEED x,100.0 y,200.0 z,50.0")
         3. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`><`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
         4. POSITION (in progress)
-        5. HIT <`motorlabel1`>,<`set_position`> <`motorlabel2`><`set_position`> ... : This command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position input.It also revolves 1 revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch
+        5. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`>,<'reverse_after_hit'> ... : This (flagged interupt) command interrupts operations and stops stepper motors, and sets the position tracker, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
         6. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
+    - Bugs to address: 
+        - STOP commands after interrupt is hit
+        - Reduction of any clogging of busy event loop

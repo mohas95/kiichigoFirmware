@@ -75,22 +75,22 @@ void MotionPlanner::request_limit_switch_action(bool with_reverse){
             
             std::ostringstream motors_to_stop;
             
-            for(std::string motor_label : limit_switch->get_mapping()) {
+            for(const std::string& motor_label : limit_switch->get_mapping()) {
 
-                double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
-
-                motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
-
+                if(std::find(disable_action_for_.begin(), disable_action_for_.end(), motor_label)==disable_action_for_.end()){ // only create command if it is not already hit
+                    double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
+                    motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
+                }
             }
 
-            std::istringstream iss(motors_to_stop.str());
-
-            command_handlers_["HIT"](iss);
+            if(!motors_to_stop.str().empty()){
+                std::istringstream iss(motors_to_stop.str());
+                command_handlers_["HIT"](iss);
+            }
         }
     }
 
 }
-
 
 
 std::string MotionPlanner::read_serial_line() {
@@ -177,6 +177,8 @@ void MotionPlanner::loop_forever(){
 
                 if(!interupt_flag_){
                     request_serial_action();
+                }else{
+                    while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {} // flush any incoming command in serial cache
                 }
 
                 bool busy = update_actions();
@@ -484,7 +486,7 @@ void MotionPlanner::register_commands_(){
         }
 
         if(!command_vec.empty()){
-
+        
             for(const auto& label : command_vec){
                 stepper_motors_[label]->revolve(0); // sets all steps to zero
                 stepper_motors_[label]->update_position();
@@ -495,7 +497,7 @@ void MotionPlanner::register_commands_(){
             std::swap(action_queue_, empty);
 
             // Flush any buffered serial input
-            while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
+            // while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
 
             LOG_INFO("INTERUPT: STOP %s\n", full_line.c_str());
 

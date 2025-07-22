@@ -45,6 +45,10 @@ void TB67S128FTG::set_standbyMode(bool active){
     gpio_put(stbyPin_, !active);
     stby_state_ = active;
 
+    if(active){
+        step_tracker_=0;
+    }
+
     // LOG_INFO("standby mode is: %s\n", active ? "Enabled" : "Disabled");
 }
 
