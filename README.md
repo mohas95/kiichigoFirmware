@@ -255,3 +255,6 @@ All kinds of feedback and contributions are welcome.
     - Bugs to address: 
         - STOP commands after interrupt is hit
         - Reduction of any clogging of busy event loop
+
+## Todo
+- Off load step generation and timing to PIO state machinges rather than hardware timer on the CPU.

@@ -48,6 +48,7 @@ add_executable( ${PROJECT_NAME}
             src/StepperDriver.cpp
             src/TB67S128FTG.cpp
             src/StepperMotor.cpp
+            src/MCP23S17.cpp
             src/LimitSwitch.cpp
             src/MotionPlanner.cpp )
 
@@ -60,7 +61,8 @@ pico_enable_stdio_usb(${PROJECT_NAME} 1)
 
 # Add the standard library to the build
 target_link_libraries(${PROJECT_NAME}
-        pico_stdlib)
+        pico_stdlib
+        hardware_spi)
 
 # Add the standard include files to the build
 target_include_directories(${PROJECT_NAME} PRIVATE
