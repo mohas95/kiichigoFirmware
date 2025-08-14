@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
+#include "hardware/pwm.h"
 
 #include "Log.h"
 #include "TB67S128FTG.h"
@@ -9,6 +10,10 @@
 #include "LimitSwitch.h"
 #include "MCP23S17.h"
 
+//Fan Mosfet Pin
+static constexpr uint PIN_FAN = 22;
+const uint FAN_slice_num = pwm_gpio_to_slice_num(PIN_FAN);
+const uint FAN_channel = pwm_gpio_to_channel(PIN_FAN);
 
 // MCP23S17 GPIO_ext Pin configuration
 static constexpr uint PIN_MISO = 16;
@@ -23,6 +28,14 @@ int main()
 {
     stdio_init_all();
     log_set_level(LogLevel::OUTPUT);
+
+    //FAN Mosfet configuration
+    gpio_set_function(PIN_FAN, GPIO_FUNC_PWM);
+    pwm_set_wrap(FAN_slice_num, 100);
+    pwm_set_clkdiv(FAN_slice_num,4.0f);
+    
+    pwm_set_chan_level(FAN_slice_num, FAN_channel, 100);
+    pwm_set_enabled(FAN_slice_num, true);
 
     // ---- SPI0 init (Mode 0) ----
     spi_init(spi0, 1'000'000);
@@ -40,12 +53,11 @@ int main()
     gpio_init(PIN_INT);
     gpio_pull_up(PIN_INT);
     gpio_set_dir(PIN_INT, GPIO_IN);
-    //
+    //MCP23S17 Configuration
     MCP23S17 mcp(spi0, PIN_CS, /*hw_addr*/0);
     mcp.setInterruptOpenDrain(true); // INT as open-drain
     mcp.setInterruptPolarity(false); // active-LOW
     mcp.mirrorInterrupts(false);     // use INTA only
-
     mcp.interruptEnableA(0b00000111); // enable on A0..A2
     mcp.interruptControlA(0x00);      // 0 = compare to PREVIOUS (fires on change)
     (void)mcp.readA();                // prime previous state & clear any pending
