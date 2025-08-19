@@ -4,7 +4,7 @@ LimitSwitch::LimitSwitch( std::string label,
                           uint8_t pin,
                           double fixed_pos,
                           std::vector<std::string> map_to,
-                          uint8_t reverse_value,
+                          double reverse_value,
                           PullMode mode ) : label_(label),
                                             fixed_position_(fixed_pos),
                                             pin_(pin),
@@ -38,7 +38,7 @@ LimitSwitch::LimitSwitch(   MCP23S17* gpio_ext,
                             std::string label, 
                             double fixed_pos, 
                             std::vector<std::string> map_to, 
-                            uint8_t reverse_value, 
+                            double reverse_value, 
                             PullMode mode) : gpio_ext_(gpio_ext),
                                                                  port_(port),
                                                                  pin_(pin),
@@ -84,7 +84,7 @@ uint8_t LimitSwitch::get_pin() const{
     return pin_;
 }
 
-uint8_t LimitSwitch::get_reverse_value() const{
+double LimitSwitch::get_reverse_value() const{
     return reverse_value_;
 }
 

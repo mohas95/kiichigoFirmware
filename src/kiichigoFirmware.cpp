@@ -31,10 +31,10 @@ int main()
 
     //FAN Mosfet configuration
     gpio_set_function(PIN_FAN, GPIO_FUNC_PWM);
-    pwm_set_wrap(FAN_slice_num, 100);
+    pwm_set_wrap(FAN_slice_num, 1000);
     pwm_set_clkdiv(FAN_slice_num,4.0f);
     
-    pwm_set_chan_level(FAN_slice_num, FAN_channel, 100);
+    pwm_set_chan_level(FAN_slice_num, FAN_channel, 1000);
     pwm_set_enabled(FAN_slice_num, true);
 
     // ---- SPI0 init (Mode 0) ----
@@ -71,17 +71,17 @@ int main()
     // Print a message to the USB serial
     printf("USB Serial connected!\n");
 
-    TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::HALF);
+    TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::QUARTER);
     // LimitSwitch home_switch("home", 18, 0, {"z"}, 1, LimitSwitch::PullMode::PULL_UP);
-    LimitSwitch z_switch(&mcp,'a', 2, "z_limit", 0, {"z"}, 2, LimitSwitch::PullMode::PULL_UP);
+    LimitSwitch z_switch(&mcp,'a', 2, "z_limit", 0, {"z"}, 1, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper1("z", stepper_driver1, 200, 100);
 
     TB67S128FTG stepper_driver2(6, 7, 8, 9, 10, 11, StepperDriver::StepMode::QUARTER);
-    LimitSwitch y_switch(&mcp,'a', 1, "y_limit", 0, {"y"}, 2, LimitSwitch::PullMode::PULL_UP);
+    LimitSwitch y_switch(&mcp,'a', 1, "y_limit", 0, {"y"}, 0.5, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper2("y", stepper_driver2, 200, 100);
 
     TB67S128FTG stepper_driver3(12, 13, 14, 15, 26, 27, StepperDriver::StepMode::QUARTER);
-    LimitSwitch x_switch(&mcp,'a', 0, "x_limit", 0, {"x"}, 2, LimitSwitch::PullMode::PULL_UP);
+    LimitSwitch x_switch(&mcp,'a', 0, "x_limit", 0, {"x"}, 0.5, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper3("x", stepper_driver3, 200, 100);
 
 
