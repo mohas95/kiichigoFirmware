@@ -258,3 +258,8 @@ All kinds of feedback and contributions are welcome.
 
 ## Todo
 - Off load step generation and timing to PIO state machinges rather than hardware timer on the CPU.
+
+## Useful commands
+- minicom -b 115200 -o -D /dev/ttyACM0
+- Homing: echo "move x,-100 y,100 z,100" > /dev/ttyACM0
+- standby: echo "standby x,1 y,1 z,1" > /dev/ttyACM0
