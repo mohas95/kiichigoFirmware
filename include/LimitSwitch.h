@@ -13,8 +13,8 @@
 
 class LimitSwitch{
     public:
-        static constexpr size_t state_window_size_ = 10; 
-        static constexpr size_t state_window_threshold_ = 8;
+        static constexpr size_t FILTER_WINDOW_SIZE = 10; 
+        static constexpr size_t FILTER_WINDOW_THRESH = 8;
 
         enum class PullMode {
             EXTERNAL_UP,       // external pull up
@@ -49,9 +49,9 @@ class LimitSwitch{
         //added lowpass filtering integreation (delete this when it works)
         // Majority window vote (requires continuos fast requests)
 
-        std::array<uint8_t, state_window_size_> state_window_;
+        std::array<uint8_t, FILTER_WINDOW_SIZE > state_window_;
         size_t state_window_idx_=0;
-        uint8_t state_window_sum_ = 0; 
+        size_t state_window_sum_ = 0; 
 
         //if using MCP23S17 gpio extender for
 

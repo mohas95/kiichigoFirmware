@@ -91,9 +91,9 @@ bool LimitSwitch::get_state(bool with_filtering){
     state_window_[state_window_idx_] = raw_state ? 1: 0;
     state_window_sum_ += state_window_[state_window_idx_];
 
-    state_window_idx_ = (state_window_idx_+1) % state_window_size_;
+    state_window_idx_ = (state_window_idx_+1) % FILTER_WINDOW_SIZE ;
 
-    return state_window_sum_ >= state_window_threshold_;
+    return state_window_sum_ >= FILTER_WINDOW_THRESH;
 
 }
 
