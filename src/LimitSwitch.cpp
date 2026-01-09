@@ -26,6 +26,8 @@ LimitSwitch::LimitSwitch( std::string label,
         case PullMode::EXTERNAL_DOWN:
             break;
     }
+
+    state_window_.fill(0);
     
 
 }
@@ -65,18 +67,33 @@ LimitSwitch::LimitSwitch(   MCP23S17* gpio_ext,
             break;
     }
 
+    state_window_.fill(0);
+
 }
 
 
-bool LimitSwitch::get_state() const{
+bool LimitSwitch::get_state(bool with_filtering){
 
-    if(!gpio_ext_){
-        bool state = gpio_get(pin_);
-        return is_active_low() ? !state : state;}
-    else{
-        bool state =  gpio_ext_->digitalRead(port_,pin_);
-        return is_active_low() ? !state : state;
+    // if(!gpio_ext_){
+    //     raw_state = gpio_get(pin_);
+    // else{
+    //     raw_state =  gpio_ext_->digitalRead(port_,pin_);
+    // }
+
+    bool raw_state = !gpio_ext_ ?  (gpio_get(pin_) != 0) : (gpio_ext_->digitalRead(port_,pin_) != 0);
+    if (is_active_low()) raw_state = !raw_state;
+
+    if (!with_filtering){
+        return raw_state;
     }
+
+    state_window_sum_ -= state_window_[state_window_idx_];
+    state_window_[state_window_idx_] = raw_state ? 1: 0;
+    state_window_sum_ += state_window_[state_window_idx_];
+
+    state_window_idx_ = (state_window_idx_+1) % state_window_size_;
+
+    return state_window_sum_ >= state_window_threshold_;
 
 }
 

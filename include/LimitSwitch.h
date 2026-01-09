@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <array>
 
 #include "pico/stdlib.h"
 #include "MCP23S17.h"
@@ -12,6 +13,8 @@
 
 class LimitSwitch{
     public:
+        static constexpr size_t state_window_size_ = 10; 
+        static constexpr size_t state_window_threshold_ = 8;
 
         enum class PullMode {
             EXTERNAL_UP,       // external pull up
@@ -23,7 +26,7 @@ class LimitSwitch{
         LimitSwitch(std::string label, uint8_t pin, double fixed_pos, std::vector<std::string> map_to={}, double reverse_value=0, PullMode mode = PullMode::PULL_UP);
         LimitSwitch(MCP23S17* gpio_ext, char port, uint8_t pin, std::string label, double fixed_pos, std::vector<std::string> map_to={}, double reverse_value=0, PullMode mode = PullMode::PULL_UP);
 
-        bool get_state() const;
+        bool get_state(bool with_filtering); //changes made for the low pass (delete this comment when works)
         uint8_t get_pin() const;
         double get_reverse_value() const;
         double get_fixed_position() const;
@@ -41,6 +44,15 @@ class LimitSwitch{
         std::vector<std::string> mapping_;
         std::string label_;
         double reverse_value_;
+
+
+        //added lowpass filtering integreation (delete this when it works)
+        // Majority window vote (requires continuos fast requests)
+
+        std::array<uint8_t, state_window_size_> state_window_;
+        size_t state_window_idx_=0;
+        uint8_t state_window_sum_ = 0; 
+
         //if using MCP23S17 gpio extender for
 
         MCP23S17* gpio_ext_= nullptr;
