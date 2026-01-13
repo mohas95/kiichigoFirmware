@@ -242,6 +242,7 @@ All kinds of feedback and contributions are welcome.
 - StepperMotor library added to abstract StepperDriver controls, includes motor specific functionalities such as revolution control, position tracking. Dependent on StepperDriver class. 
 - Logging module added to simplify displaying various levels of messages on Serial Monitor.
 - support for limit switches
+    - Limit switch class integrates lowpass signal filtering for debounce for stray signals
 - Multi-Motor Control with the MotionPlanner Package.
     - Current Functionality is to receive commands from Serial USB 
     - Concurrent operation with the loop_forever() method (blocking)

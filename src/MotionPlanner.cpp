@@ -32,7 +32,7 @@ void MotionPlanner::output_states() {
 
         for(const auto&[label, limit_switch]: limit_switches_){
 
-            std::string switch_state = limit_switch->get_state() ? "activated": "off";
+            std::string switch_state = limit_switch->get_state(true) ? "activated": "off";
 
             output_state << label << "(limit_switch):" << switch_state << " ";
 
@@ -71,7 +71,7 @@ void MotionPlanner::request_limit_switch_action(bool with_reverse){
 
     for (const auto&[label, limit_switch]: limit_switches_){
         
-        if(limit_switch->get_state()){
+        if(limit_switch->get_state(true)){
             
             std::ostringstream motors_to_stop;
             
