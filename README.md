@@ -235,6 +235,9 @@ All kinds of feedback and contributions are welcome.
     - [github](https://github.com/axelrefalo)
 
 ## Change Log
+### 0.1.0 (Not released yet)
+- Overhauling timing process from naive hardware timing to interupt request(IRQ) and Interrupt Service Routines(ISR)
+
 ### 0.0.1 (Not released yet)
 - Complete Overhaul of old project, reorganization of project structure.
 - StepperDriver Parent class for blueprint of various stepperdrivers on market.

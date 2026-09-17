@@ -1,14 +1,15 @@
 #include "StepperMotor.h"
 #include "Log.h"
 #include <cmath>
-
+#include "pico/time.h"
 
 StepperMotor::StepperMotor (std::string label,
                             StepperDriver &driver,
                             uint32_t steps_per_rev,
-                            double default_speed) : 
+                            double default_speed_rpm) : 
                             label_(label),
-                            driver_(driver)
+                            driver_(driver),
+                            default_speed_rpm_(default_speed_rpm)
                             {
     //Set default values 
 
@@ -16,13 +17,117 @@ StepperMotor::StepperMotor (std::string label,
     auto modeMultiplier = STEP_MODE_MULTIPLIER[static_cast<size_t>(step_mode)];
     steps_per_rev_ = steps_per_rev*modeMultiplier;
 
-    set_speed(default_speed);
+    set_speed(default_speed_rpm);
     update_position();
 
     LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_.c_str(), modeMultiplier, steps_per_rev_);
 
 
 }
+
+
+// version 0.1.0
+
+void StepperMotor::step_for(int32_t steps, double speed_rpm){
+    
+    if(steps==0){
+        return;
+    }
+    
+    if(!set_speed(speed_rpm)){
+        return;
+    }
+    
+    driver_.set_direction(steps>=0);
+    steps_remaining_ = std::abs(steps);
+
+    add_repeating_timer_us(
+        -static_cast<int64_t>(step_period_),
+        step_irq_timer_cb,
+        this,
+        &timer_
+    );
+}
+
+bool StepperMotor::step_irq_timer_cb(repeating_timer_t* timer){
+    StepperMotor* motor = static_cast<StepperMotor*>(timer->user_data);
+    motor->driver_.step_high();
+
+    add_alarm_in_us(
+        motor->driver_.get_pulse_width(),
+        pulse_low_cb,
+        motor,
+        true
+    );
+
+    motor->steps_remaining_--;
+
+    motor->register_step();
+    
+    return motor->steps_remaining_>0;
+}
+
+int64_t StepperMotor::pulse_low_cb(alarm_id_t id, void* user_data){
+    auto* motor = static_cast<StepperMotor*>(user_data);
+    motor->driver_.step_low();
+
+    return 0;
+}
+
+
+uint32_t StepperMotor::get_step_period() const{
+    return step_period_;
+}
+
+
+bool StepperMotor::set_speed(double rpm){
+
+    if (rpm<=0.0){
+        LOG_DEBUG("[%s Error] Speed needs to be > 0rpm:%0.2f", label_.c_str(), rpm);
+        return false;
+    }
+    
+    
+    uint8_t pulse_width = driver_.get_pulse_width();
+    double step_period_us = 60'000'000.0/(rpm * static_cast<double>(steps_per_rev_));
+    uint32_t step_period = static_cast<uint32_t>(std::round(step_period_us));
+    
+    if(step_period <= pulse_width){
+        LOG_DEBUG("[%s ERROR] Step period(%u) is <= than Pulse width(%u), Speed not set]", label_.c_str(), step_period, pulse_width);
+        return false;
+    }
+
+    uint32_t pulse_interval = step_period - pulse_width; //depreciated
+    driver_.set_pulse_interval(pulse_interval); //depreciated
+    
+    step_period_ = step_period;
+    speed_rpm_ = rpm;
+
+    LOG_DEBUG("%s Speed set to: %0.2f rpm(%u us pulse inteval)\n", label_.c_str(), rpm, pulse_interval);   
+
+    return true;
+}
+
+double StepperMotor::get_speed() const{
+    return speed_rpm_;
+}
+
+bool StepperMotor::get_direction(){
+    return driver_.get_direction();
+}
+
+void StepperMotor::register_step(){
+    if (driver_.get_direction()){
+        position_step_++;
+    }else{
+        position_step_--;
+    }
+}
+
+
+//Depreciated
+
+
 
 void StepperMotor::revolve(double revolutions){
 
@@ -42,22 +147,9 @@ void StepperMotor::revolve(double revolutions){
     }
 }
 
-void StepperMotor::set_speed(double rpm){
-    speed_ = rpm;
 
-    uint8_t pulse_width = driver_.get_pulse_width();
-    double pulse_length = 60'000'000.0/(rpm* static_cast<double>(steps_per_rev_));
-    uint32_t pulse_interval = static_cast<uint32_t>(std::round(pulse_length)) - pulse_width;
 
-    driver_.set_pulse_interval(pulse_interval);
 
-    LOG_DEBUG("%s Speed set to: %0.2f rpm(%d us pulse inteval)\n", label_.c_str(), rpm, pulse_interval);   
-
-}
-
-bool StepperMotor::get_direction(){
-    return driver_.get_direction();
-}
 
 std::tuple<int32_t, double> StepperMotor::update_position(){
     position_step_ = driver_.get_step_tracker();
@@ -111,9 +203,7 @@ const std::string& StepperMotor::label() const{
     return label_;
 };
 
-double StepperMotor::get_speed() const{
-    return speed_;
-}
+
 
 int32_t StepperMotor::get_position_step() const{
     return position_step_;

@@ -29,9 +29,6 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
     gpio_init(mode1Pin_); gpio_set_dir(mode1Pin_, GPIO_OUT);
     gpio_init(mode2Pin_); gpio_set_dir(mode2Pin_, GPIO_OUT);
 
-    // Initialize values;
-    last_time_update_us_ = time_us_64();
-    step_tracker_=0;
 
     
     // Set default states
@@ -39,22 +36,36 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
     set_standbyMode(false);
     set_direction(true);
 
+    //depreciated initializations
+
+    // Initialize values;
+    last_time_update_us_ = time_us_64();
+    step_tracker_=0;
+
 }
 
-void TB67S128FTG::set_standbyMode(bool active){
-    gpio_put(stbyPin_, !active);
-    stby_state_ = active;
+// V0.1.0
 
-    if(active){
-        step_tracker_=0;
-    }
-
-    // LOG_INFO("standby mode is: %s\n", active ? "Enabled" : "Disabled");
+void TB67S128FTG::step_high(){
+    gpio_put(stepPin_, true); 
 }
 
-bool TB67S128FTG::get_standbyMode(){
-    return stby_state_;
+void TB67S128FTG::step_low(){
+    gpio_put(stepPin_, false);
 }
+
+// void TB67S128FTG::register_step(){
+//     if(stby_state_){
+//         return;
+//     }
+
+//     if(dir_state_){
+//         step_tracker_++;
+//     }else{
+//         step_tracker_--;
+//     }
+// }
+
 
 void TB67S128FTG::set_stepMode(StepMode step_mode){
     
@@ -74,6 +85,23 @@ StepperDriver::StepMode TB67S128FTG::get_stepMode(){
     return current_stepMode_;
 }
 
+
+void TB67S128FTG::set_standbyMode(bool active){
+    gpio_put(stbyPin_, !active);
+    stby_state_ = active;
+
+    if(active){
+        step_tracker_=0;
+    }
+
+    // LOG_INFO("standby mode is: %s\n", active ? "Enabled" : "Disabled");
+}
+
+bool TB67S128FTG::get_standbyMode(){
+    return stby_state_;
+}
+
+
 void TB67S128FTG::set_direction(bool direction){    
 
     gpio_put(dirPin_, direction);
@@ -88,24 +116,26 @@ bool TB67S128FTG::get_direction() const{
 
 }
 
-
-void TB67S128FTG::set_pulse_interval(uint32_t pulse_interval){
-    pulse_interval_=pulse_interval;
-}
-
 void TB67S128FTG::set_pulse_width(uint8_t pulse_width){
     pulse_width_=pulse_width;
-}
-
-
-uint32_t TB67S128FTG::get_pulse_interval(){
-    return pulse_interval_;
 }
 
 uint8_t TB67S128FTG::get_pulse_width(){
     return pulse_width_;
 }
 
+
+
+//older version depreciated
+
+
+void TB67S128FTG::set_pulse_interval(uint32_t pulse_interval){
+    pulse_interval_=pulse_interval;
+}
+
+uint32_t TB67S128FTG::get_pulse_interval(){
+    return pulse_interval_;
+}
 
 void TB67S128FTG::step_for(uint32_t steps){
     steps_=steps;

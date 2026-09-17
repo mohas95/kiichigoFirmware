@@ -5,7 +5,7 @@
 #include <array>
 #include <tuple>
 #include <string>
-
+#include "pico/time.h"
 
 
 
@@ -25,18 +25,33 @@ class StepperMotor {
         StepperMotor(std::string label,
                      StepperDriver& driver,
                      uint32_t steps_per_rev,
-                     double default_speed=200); //in rpm
+                     double default_speed_rpm=100); //in rpm
+
+        
+        // version 0.1.0
+        
+        void step_for(int32_t steps, double speed_rpm);
+        uint32_t get_step_period() const;
+
+        bool set_speed(double rpm=200);
+        double get_speed() const;
+        
+        bool get_direction();
+        void set_standbyMode(bool);
+
+
+        void register_step();
+
+
+        //Depreciated
 
         void revolve(double revolutions=1.0);
-        void set_speed(double rpm=200);
         void home();
         std::tuple<int32_t, double>  update_position();
         void update_position(double);
         bool step();
-        void set_standbyMode(bool);
 
-        bool get_direction();
-        double get_speed() const;
+        
         int32_t get_position_step() const;
         double get_position_rev() const;
         bool get_standbyMode() const;
@@ -45,11 +60,26 @@ class StepperMotor {
 
 
     private:
+        
+        // v0.1.0
+        static bool step_irq_timer_cb(repeating_timer_t* timer);
+        static int64_t pulse_low_cb(alarm_id_t id, void* user_data);
+        
         std::string label_;
         uint32_t steps_per_rev_;
         StepperDriver& driver_;
-        int32_t position_step_;
-        double position_revolutions_, speed_;
+
+        repeating_timer_t timer_;
+        volatile uint32_t steps_remaining_=0;
+        double speed_rpm_, default_speed_rpm_; // in rpm
+        uint32_t step_period_; //in us
+
+        volatile int32_t position_step_= 0;
+
+        // older need to sort
+        double position_revolutions_= 0;
+
+
 
 };
 
