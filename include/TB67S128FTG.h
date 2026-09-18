@@ -70,7 +70,7 @@ class TB67S128FTG : public StepperDriver{
         StepMode current_stepMode_;
 
         //depreciated
-        bool pulse_state_=false
+        bool pulse_state_=false;
         uint64_t last_time_update_us_;
         uint32_t pulse_interval_; // in microseconds
         uint32_t steps_=0;
