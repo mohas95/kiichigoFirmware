@@ -15,12 +15,12 @@ StepperMotor::StepperMotor (std::string label,
 
     StepperDriver::StepMode step_mode = driver_.get_stepMode();
     auto modeMultiplier = STEP_MODE_MULTIPLIER[static_cast<size_t>(step_mode)];
-    default_steps_per_rev_ = steps_per_rev
+    default_steps_per_rev_ = steps_per_rev;
     steps_per_rev_ = default_steps_per_rev_ * modeMultiplier;
 
     set_speed(default_speed_rpm);
     // update_position(); // depreciated
-    reset_steps_to_zero(); //untested
+    reset_steps_to_zero(); 
 
     LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_.c_str(), modeMultiplier, steps_per_rev_);
 
@@ -32,10 +32,23 @@ StepperMotor::StepperMotor (std::string label,
 void StepperMotor::step_for(int32_t steps, double speed_rpm){
     
     if(steps==0){
+        LOG_DEBUG("[%s Step action rejected] steps need to be > 0\n", label_.c_str());
         return;
     }
     
     if(!set_speed(speed_rpm)){
+        LOG_DEBUG("[%s Step action rejected] Error in setting speed\n", label_.c_str());
+
+        return;
+    }
+
+    if(get_standbyMode()){
+        LOG_DEBUG("[%s Step action rejected] Standby mode active\n", label_.c_str());
+        return;
+    }
+
+    if(active()){
+        LOG_DEBUG("[%s Step action rejected] driver task is active\n", label_.c_str());
         return;
     }
     
@@ -77,7 +90,7 @@ bool StepperMotor::set_speed(double rpm){
     step_period_ = step_period;
     speed_rpm_ = rpm;
 
-    LOG_DEBUG("%s Speed set to: %0.2f rpm(%u us pulse inteval)\n", label_.c_str(), rpm, pulse_interval);   
+    LOG_DEBUG("%s Speed set to: %0.2f rpm\n", label_.c_str(), rpm);   
 
     return true;
 }
@@ -93,7 +106,7 @@ bool StepperMotor::get_direction(){
 void StepperMotor::set_standbyMode(bool active){
     driver_.set_standbyMode(active);
     // update_position(); //depreciated
-    reset_steps_to_zero(); //untested
+    reset_steps_to_zero();
     LOG_DEBUG("%s Standby Mode %s", label_.c_str(), active ?"enabled":"disabled");   
 
 }
@@ -107,13 +120,21 @@ void StepperMotor::change_stepMode(StepperDriver::StepMode step_mode){
     driver_.set_stepMode(step_mode);
     auto modeMultiplier = STEP_MODE_MULTIPLIER[static_cast<size_t>(step_mode)];
     steps_per_rev_ = default_steps_per_rev_ * modeMultiplier;
-    reset_steps_to_zero(); //untested
+    reset_steps_to_zero();
 }
 
 StepperDriver::StepMode StepperMotor::get_stepMode() const{
-    return driver_.get_stepMode;
+    return driver_.get_stepMode();
 }
 
+bool StepperMotor::active() const {
+
+    return steps_remaining_>0;
+}
+
+uint32_t StepperMotor::get_steps_remaining() const{
+    return steps_remaining_;
+}
 
 
 // private
@@ -205,9 +226,7 @@ void StepperMotor::home(){
 }
 
 
-bool StepperMotor::active(){
-    return driver_.active();
-}
+
 
 bool StepperMotor::step(){
     bool pulse_flag = driver_.step_pulse();

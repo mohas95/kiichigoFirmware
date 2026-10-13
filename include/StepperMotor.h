@@ -40,8 +40,12 @@ class StepperMotor {
         void set_standbyMode(bool);
         bool get_standbyMode() const;
 
-        void change_stepMode(StepperDriver::StepMode step_mode); //untested
-        StepperDriver::StepMode get_stepMode() const; //untested
+        void change_stepMode(StepperDriver::StepMode step_mode);
+        StepperDriver::StepMode get_stepMode() const; 
+
+        bool active() const;
+        uint32_t get_steps_remaining() const;
+
 
         //Depreciated
         void revolve(double revolutions=1.0);
@@ -54,7 +58,6 @@ class StepperMotor {
         int32_t get_position_step() const;
         double get_position_rev() const;
         const std::string& label() const;
-        bool active();
 
 
     private:
@@ -63,7 +66,7 @@ class StepperMotor {
         static bool step_irq_timer_cb(repeating_timer_t* timer);
         static int64_t pulse_low_cb(alarm_id_t id, void* user_data);
         void register_step();
-        void reset_steps_to_zero(); //untested
+        void reset_steps_to_zero();
         
         std::string label_;
         uint32_t default_steps_per_rev_; //original full stepmode configuration of the motor
@@ -75,7 +78,7 @@ class StepperMotor {
         double speed_rpm_, default_speed_rpm_; // in rpm
         uint32_t step_period_; //in us
 
-        int32_t position_step_= 0;
+        volatile int32_t position_step_= 0;
 
         // older need to sort
         double position_revolutions_= 0;
