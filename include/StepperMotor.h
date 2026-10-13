@@ -46,6 +46,8 @@ class StepperMotor {
         bool active() const;
         uint32_t get_steps_remaining() const;
 
+        // TODO: revolve tracking, relative revolution (angular)position, and absolute revolution position
+
 
         //Depreciated
         void revolve(double revolutions=1.0);
