@@ -8,7 +8,6 @@
 #include "pico/time.h"
 
 
-
 class StepperMotor {
     public:
         static constexpr std::array<uint8_t, 8> STEP_MODE_MULTIPLIER = {{
@@ -46,21 +45,26 @@ class StepperMotor {
         bool active() const;
         uint32_t get_steps_remaining() const;
 
-        // TODO: revolve tracking, relative revolution (angular)position, and absolute revolution position
+        void revolve(double revolutions, double speed_rpm);
+        
+        int32_t get_position_step() const;
+        double get_position_rev() const;
+       
+        double get_position_deg() const;
+        double get_position_deg_wrapped() const;
+        
+        double get_position_rad() const;
+        double get_position_rad_wrapped() const;
+
+        const std::string& label() const;
 
 
         //Depreciated
-        void revolve(double revolutions=1.0);
+        // TODO: Phase out and delete non useful members
         void home();
         std::tuple<int32_t, double>  update_position();
         void update_position(double);
         bool step();
-
-        
-        int32_t get_position_step() const;
-        double get_position_rev() const;
-        const std::string& label() const;
-
 
     private:
         
@@ -82,7 +86,7 @@ class StepperMotor {
 
         volatile int32_t position_step_= 0;
 
-        // older need to sort
+        // older need to sort TODO: Phase out and delete non useful members
         double position_revolutions_= 0;
 
 

@@ -136,6 +136,56 @@ uint32_t StepperMotor::get_steps_remaining() const{
     return steps_remaining_;
 }
 
+void StepperMotor::revolve(double revolutions, double speed_rpm){
+
+    uint32_t steps = static_cast<int32_t>(std::round(revolutions * steps_per_rev_));
+    step_for(steps, speed_rpm);
+
+    LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), revolutions);
+
+}
+
+int32_t StepperMotor::get_position_step() const{
+    return position_step_;
+}
+
+double StepperMotor::get_position_rev() const{
+    return static_cast<double>(position_step_) / steps_per_rev_;
+}
+
+double StepperMotor::get_position_deg() const{
+    return static_cast<double>(position_step_) / steps_per_rev_ * 360.0;
+}
+
+double StepperMotor::get_position_deg_wrapped() const{
+    double angle = get_position_deg();
+    angle = std::fmod(angle, 360.0);
+
+    if (angle<0.0) {
+        angle += 360.0;
+    }
+
+    return angle;
+}
+
+double StepperMotor::get_position_rad() const{
+    return static_cast<double>(position_step_) / steps_per_rev_ * (2.0*M_PI);
+}
+
+double StepperMotor::get_position_rad_wrapped() const{
+    double angle = get_position_rad();
+    angle = std::fmod(angle, 2.0*M_PI);
+
+    if (angle<0.0) {
+        angle += 2.0*M_PI;
+    }
+
+    return angle;
+}
+
+const std::string& StepperMotor::label() const{
+    return label_;
+};
 
 // private
 
@@ -178,25 +228,7 @@ void StepperMotor::reset_steps_to_zero(){
 
 
 //Depreciated
-
-void StepperMotor::revolve(double revolutions){
-
-    if(!driver_.get_standbyMode()){
-    
-        bool direction = revolutions>=0 ? true:false;
-        driver_.set_direction(direction);
-        
-        LOG_DEBUG("%s direction set to: %s\n", label_.c_str(), direction ? "CW" : "CCW");
-        
-        uint32_t steps = static_cast<uint32_t>(std::round(std::abs(revolutions) * steps_per_rev_));
-        driver_.step_for(steps);
-        
-        LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), std::abs(revolutions));
-    }else{
-        LOG_DEBUG("%s is in standby mode", label_.c_str());
-    }
-}
-
+// TODO: Phase out and delete non useful members
 
 std::tuple<int32_t, double> StepperMotor::update_position(){
     position_step_ = driver_.get_step_tracker();
@@ -225,9 +257,6 @@ void StepperMotor::home(){
 
 }
 
-
-
-
 bool StepperMotor::step(){
     bool pulse_flag = driver_.step_pulse();
     
@@ -237,18 +266,3 @@ bool StepperMotor::step(){
 
     return pulse_flag;
 }
-
-const std::string& StepperMotor::label() const{
-    return label_;
-};
-
-
-
-int32_t StepperMotor::get_position_step() const{
-    return position_step_;
-}
-
-double StepperMotor::get_position_rev() const{
-    return position_revolutions_;
-}
-

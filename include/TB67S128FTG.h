@@ -33,7 +33,6 @@ class TB67S128FTG : public StepperDriver{
         // V0.1.0
         void step_high() override;
         void step_low() override;
-        // void register_step() override;
         
         void set_stepMode(StepMode step_mode) override;
         StepMode get_stepMode() override;
@@ -49,6 +48,7 @@ class TB67S128FTG : public StepperDriver{
         
 
         //older version depreciated
+        // TODO: Phase out and delete non useful members
         
         void set_pulse_interval(uint32_t pulse_interval) override;        
         uint32_t get_pulse_interval() override;
@@ -70,6 +70,7 @@ class TB67S128FTG : public StepperDriver{
         StepMode current_stepMode_;
 
         //depreciated
+        // TODO: Phase out and delete non useful members
         bool pulse_state_=false;
         uint64_t last_time_update_us_;
         uint32_t pulse_interval_; // in microseconds

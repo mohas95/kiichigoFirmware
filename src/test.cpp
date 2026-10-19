@@ -24,69 +24,69 @@ int main(){
     // LimitSwitch home_switch("home", 18, 0, {"z"}, 1, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper1("z", stepper_driver1, 200, 50);
 
-    stepper1.step_for(1000, 100);
 
-    while (stepper1.active())
-    {
+    stepper1.revolve(5,100);
 
-        printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
+    while (stepper1.active()){
+
+        printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+            stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    }
+    printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+        stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    
+    sleep_ms(2000);
+    
+    stepper1.revolve(-3,50);
+
+    while (stepper1.active()){
+
+        printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+            stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
     }
 
-    stepper1.step_for(-500, 10);
+    printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+        stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    
+    sleep_ms(3000);
+    
+
+    // stepper1.step_for(1000, 100);
+
+    // while (stepper1.active())
+    // {
+
+    //     printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
+    // }
+
+    // stepper1.step_for(-500, 10);
 
 
-    while (stepper1.active())
-    {
-        // stepper1.step_for(-1000, 100); // some racing happening, will need to debug in the future
+    // while (stepper1.active())
+    // {
+    //     // stepper1.step_for(-1000, 100); // some racing happening, will need to debug in the future
 
-        printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
-    }
+    //     printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
+    // }
 
-    printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
-
-
-    stepper1.change_stepMode(StepperDriver::StepMode::FULL);
-
-    // stepper1.set_standbyMode(true);
-
-    stepper1.step_for(1000, 200);
+    // printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
 
 
-    while (stepper1.active())
-    {
-        printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
-    }
+    // stepper1.change_stepMode(StepperDriver::StepMode::FULL);
 
-    printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
+    // // stepper1.set_standbyMode(true);
+
+    // stepper1.step_for(1000, 200);
+
+
+    // while (stepper1.active())
+    // {
+    //     printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
+    // }
+
+    // printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
 
     stepper1.set_standbyMode(true);
 
 
-
-
-    // uint32_t counter = 0;
-
-    // while (counter <= 200){
-    //      printf("%u\n", counter);
-    //      counter++;
-    //     sleep_ms(100);
-
-    // }
-
-    // stepper1.step_for(-10000, 50);
-    // counter = 0;
-
-    // while (counter <= 200){
-    //      printf("%u\n", counter);
-    //      counter++;
-    //     sleep_ms(100);
-
-    // }
-    // while (true) {
-    //     stepper_driver1.step_high();
-    //     sleep_us(50);
-
-    //     stepper_driver1.step_low();
-    //     sleep_ms(50);
-    // }
 }

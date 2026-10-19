@@ -51,7 +51,8 @@ add_executable( ${PROJECT_NAME}
             src/StepperMotor.cpp
             src/MCP23S17.cpp
             src/LimitSwitch.cpp
-            src/MotionPlanner.cpp )
+            # src/MotionPlanner.cpp 
+            )
 
 pico_set_program_name(${PROJECT_NAME} "kiichigoFirmware")
 pico_set_program_version(${PROJECT_NAME} "0.1")
