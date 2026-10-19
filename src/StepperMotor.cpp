@@ -19,7 +19,6 @@ StepperMotor::StepperMotor (std::string label,
     steps_per_rev_ = default_steps_per_rev_ * modeMultiplier;
 
     set_speed(default_speed_rpm);
-    // update_position(); // depreciated
     reset_steps_to_zero(); 
 
     LOG_DEBUG("%s Defaults set: StepMode Multiplier- %d, steps per revolution- %d, \n", label_.c_str(), modeMultiplier, steps_per_rev_);
@@ -31,6 +30,8 @@ StepperMotor::StepperMotor (std::string label,
 
 void StepperMotor::step_for(int32_t steps, double speed_rpm){
     
+    stop_flag_=false;
+
     if(steps==0){
         LOG_DEBUG("[%s Step action rejected] steps need to be > 0\n", label_.c_str());
         return;
@@ -63,6 +64,10 @@ void StepperMotor::step_for(int32_t steps, double speed_rpm){
     );
 }
 
+void StepperMotor::stop(){
+    stop_flag_=true;
+}
+
 uint32_t StepperMotor::get_step_period() const{
     return step_period_;
 }
@@ -83,9 +88,6 @@ bool StepperMotor::set_speed(double rpm){
         LOG_DEBUG("[%s ERROR] Step period(%u) is <= than Pulse width(%u), Speed not set]", label_.c_str(), step_period, pulse_width);
         return false;
     }
-
-    // uint32_t pulse_interval = step_period - pulse_width; //depreciated
-    // driver_.set_pulse_interval(pulse_interval); //depreciated
     
     step_period_ = step_period;
     speed_rpm_ = rpm;
@@ -191,6 +193,12 @@ const std::string& StepperMotor::label() const{
 
 bool StepperMotor::step_irq_timer_cb(repeating_timer_t* timer){
     StepperMotor* motor = static_cast<StepperMotor*>(timer->user_data);
+    
+    if (motor->stop_flag_){
+        motor->steps_remaining_= 0;
+        return false;
+    }
+    
     motor->driver_.step_high();
 
     add_alarm_in_us(
@@ -224,45 +232,4 @@ void StepperMotor::register_step(){
 
 void StepperMotor::reset_steps_to_zero(){
     position_step_ = 0;
-}
-
-
-//Depreciated
-// TODO: Phase out and delete non useful members
-
-std::tuple<int32_t, double> StepperMotor::update_position(){
-    position_step_ = driver_.get_step_tracker();
-    position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);
-
-    LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);
-
-    return std::make_tuple(position_step_,position_revolutions_);  
-}
-
-void StepperMotor::update_position(double rev_pos){
-
-    position_step_ = static_cast<int32_t>(std::round(rev_pos * static_cast<double>(steps_per_rev_)));
-    position_revolutions_ = static_cast<double>(position_step_)/static_cast<double>(steps_per_rev_);
-
-    driver_.set_step_tracker(position_step_);
-    LOG_DEBUG("%s Position: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);
-}
-
-void StepperMotor::home(){
-
-    driver_.home();
-    update_position();
-
-    LOG_DEBUG("%s HOME HIT! Position reset to: %d steps (%.2f revolutions) \n", label_.c_str(), position_step_, position_revolutions_);   
-
-}
-
-bool StepperMotor::step(){
-    bool pulse_flag = driver_.step_pulse();
-    
-    if (pulse_flag){
-        update_position();
-    }
-
-    return pulse_flag;
 }

@@ -26,8 +26,7 @@ class TB67S128FTG : public StepperDriver{
                     uint8_t mode1Pin,
                     uint8_t mode2Pin,
                     StepMode step_mode = StepMode::FULL,
-                    uint8_t default_pulse_width=5,
-                    uint32_t default_pulse_interval=500000 //depreciated
+                    uint8_t default_pulse_width=5
                     );
 
         // V0.1.0
@@ -46,39 +45,11 @@ class TB67S128FTG : public StepperDriver{
         void set_pulse_width(uint8_t pulse_width) override;
         uint8_t get_pulse_width() override;
         
-
-        //older version depreciated
-        // TODO: Phase out and delete non useful members
-        
-        void set_pulse_interval(uint32_t pulse_interval) override;        
-        uint32_t get_pulse_interval() override;
-        
-        void step_for(uint32_t steps) override;
-        bool step_pulse() override;
-        void home() override;
-
-        int32_t get_step_tracker() override;
-        void set_step_tracker(int32_t) override;
-        bool active() override;
-
-
-
     private:
         uint8_t dirPin_, stepPin_, stbyPin_, mode0Pin_, mode1Pin_, mode2Pin_;
         bool stby_state_, dir_state_;
         uint8_t pulse_width_; // in microseconds
         StepMode current_stepMode_;
-
-        //depreciated
-        // TODO: Phase out and delete non useful members
-        bool pulse_state_=false;
-        uint64_t last_time_update_us_;
-        uint32_t pulse_interval_; // in microseconds
-        uint32_t steps_=0;
-        int32_t step_tracker_;
-
-
-
 
 };
 

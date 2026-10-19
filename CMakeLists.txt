@@ -51,6 +51,7 @@ add_executable( ${PROJECT_NAME}
             src/StepperMotor.cpp
             src/MCP23S17.cpp
             src/LimitSwitch.cpp
+            src/MotionCoordinator.cpp
             # src/MotionPlanner.cpp 
             )
 

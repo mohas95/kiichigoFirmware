@@ -9,16 +9,14 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
                           uint8_t mode1Pin,
                           uint8_t mode2Pin,
                           StepMode step_mode,
-                          uint8_t default_pulse_width,
-                          uint32_t default_pulse_interval)
+                          uint8_t default_pulse_width)
                           : dirPin_(dirPin),
                             stepPin_(stepPin),
                             stbyPin_(stbyPin),
                             mode0Pin_(mode0Pin),
                             mode1Pin_(mode1Pin),
                             mode2Pin_(mode2Pin),
-                            pulse_width_(default_pulse_width),
-                            pulse_interval_(default_pulse_interval)
+                            pulse_width_(default_pulse_width)
                             {
 
     // Initialize Pins and set to output 
@@ -35,13 +33,6 @@ TB67S128FTG::TB67S128FTG (uint8_t dirPin,
     set_stepMode(step_mode);
     set_standbyMode(false);
     set_direction(true);
-
-    //depreciated initializations
-
-    // Initialize values;
-    last_time_update_us_ = time_us_64();
-    step_tracker_=0;
-
 }
 
 // V0.1.0
@@ -53,19 +44,6 @@ void TB67S128FTG::step_high(){
 void TB67S128FTG::step_low(){
     gpio_put(stepPin_, false);
 }
-
-// void TB67S128FTG::register_step(){
-//     if(stby_state_){
-//         return;
-//     }
-
-//     if(dir_state_){
-//         step_tracker_++;
-//     }else{
-//         step_tracker_--;
-//     }
-// }
-
 
 void TB67S128FTG::set_stepMode(StepMode step_mode){
     
@@ -89,10 +67,6 @@ StepperDriver::StepMode TB67S128FTG::get_stepMode(){
 void TB67S128FTG::set_standbyMode(bool active){
     gpio_put(stbyPin_, !active);
     stby_state_ = active;
-
-    if(active){
-        step_tracker_=0;
-    }
 
     // LOG_INFO("standby mode is: %s\n", active ? "Enabled" : "Disabled");
 }
@@ -122,77 +96,4 @@ void TB67S128FTG::set_pulse_width(uint8_t pulse_width){
 
 uint8_t TB67S128FTG::get_pulse_width(){
     return pulse_width_;
-}
-
-
-
-//older version depreciated
-
-
-void TB67S128FTG::set_pulse_interval(uint32_t pulse_interval){
-    pulse_interval_=pulse_interval;
-}
-
-uint32_t TB67S128FTG::get_pulse_interval(){
-    return pulse_interval_;
-}
-
-void TB67S128FTG::step_for(uint32_t steps){
-    steps_=steps;
-}
-
-bool TB67S128FTG::step_pulse(){
-
-    uint64_t time_now = time_us_64();
-    uint64_t time_diff = time_now-last_time_update_us_;
-
-    if(steps_>0){
-
-        if (pulse_state_ && time_diff>=pulse_width_){
-            pulse_state_ = false;
-            gpio_put(stepPin_, false);
-            last_time_update_us_ = time_now;
-            steps_--;
-
-            if(dir_state_ && !stby_state_){
-                step_tracker_++;
-            } else if (!dir_state_ && !stby_state_){
-                step_tracker_--;
-            }
-            
-            // LOG_DEBUG("Pulse Remaining: %d\n", steps_);
-            // LOG_DEBUG("Pulse: %s | Remaining: %d\n", pulse_state_ ? "HIGH" : "LOW", steps_);
-
-            
-        }else if (!pulse_state_ && time_diff>=pulse_interval_){
-            pulse_state_ = true;
-            gpio_put(stepPin_, true);
-            last_time_update_us_ = time_now;
-
-        }
-
-        return true;
-        
-    }
-
-    return false;
-   
-}
-
-void TB67S128FTG::home(){
-    step_tracker_ = 0;
-}
-
-int32_t TB67S128FTG::get_step_tracker(){
-    return step_tracker_;
-}
-
-void TB67S128FTG::set_step_tracker(int32_t pos){
-
-    step_tracker_ = pos;
-}
-
-bool TB67S128FTG::active(){
-
-    return steps_ > 0 ? true:false; 
 }

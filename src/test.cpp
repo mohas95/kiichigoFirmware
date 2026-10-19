@@ -6,6 +6,10 @@
 #include "Log.h"
 #include "TB67S128FTG.h"
 #include "StepperMotor.h"
+#include "MotionCoordinator.h"
+
+
+MotionConfig config;
 
 
 int main(){
@@ -24,33 +28,44 @@ int main(){
     // LimitSwitch home_switch("home", 18, 0, {"z"}, 1, LimitSwitch::PullMode::PULL_UP);
     StepperMotor stepper1("z", stepper_driver1, 200, 50);
 
+    config.stepper_motors={&stepper1};
 
-    stepper1.revolve(5,100);
+    MotionCoordinator coordinator(config, 250);
 
-    while (stepper1.active()){
+    coordinator.loop_forever(); //this is blocking
 
-        printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
-            stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
-    }
-    printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
-        stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    printf("Done!\n");
+
+    return 0;
+}
+
+
+    // stepper1.revolve(5,100);
+
+    // while (stepper1.active()){
+
+    //     printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+    //         stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    // }
+    // printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+    //     stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
     
-    sleep_ms(2000);
+    // sleep_ms(2000);
     
-    stepper1.revolve(-3,50);
+    // stepper1.revolve(-3,50);
 
-    while (stepper1.active()){
+    // while (stepper1.active()){
 
-        printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
-            stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
-    }
+    //     printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+    //         stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    // }
 
-    printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
-        stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
+    // printf("steps remaining:%i, step position:%i, rev position:%0.2f, deg position:%0.2f, angular position:%0.2f\n", 
+    //     stepper1.get_steps_remaining(), stepper1.get_position_step(), stepper1.get_position_rev(), stepper1.get_position_deg(), stepper1.get_position_deg_wrapped());
     
-    sleep_ms(3000);
+    // sleep_ms(3000);
     
-
+//
     // stepper1.step_for(1000, 100);
 
     // while (stepper1.active())
@@ -86,7 +101,7 @@ int main(){
 
     // printf("steps remaining:%i, position:%i\n", stepper1.get_steps_remaining(), stepper1.get_position_step());
 
-    stepper1.set_standbyMode(true);
+//     stepper1.set_standbyMode(true);
 
 
-}
+// }

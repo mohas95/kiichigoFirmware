@@ -30,6 +30,7 @@ class StepperMotor {
         // version 0.1.0
         
         void step_for(int32_t steps, double speed_rpm);
+        void stop();
         uint32_t get_step_period() const;
 
         bool set_speed(double rpm=200);
@@ -58,14 +59,6 @@ class StepperMotor {
 
         const std::string& label() const;
 
-
-        //Depreciated
-        // TODO: Phase out and delete non useful members
-        void home();
-        std::tuple<int32_t, double>  update_position();
-        void update_position(double);
-        bool step();
-
     private:
         
         // v0.1.0
@@ -83,12 +76,9 @@ class StepperMotor {
         volatile uint32_t steps_remaining_=0;
         double speed_rpm_, default_speed_rpm_; // in rpm
         uint32_t step_period_; //in us
+        volatile bool stop_flag_ = false;
 
         volatile int32_t position_step_= 0;
-
-        // older need to sort TODO: Phase out and delete non useful members
-        double position_revolutions_= 0;
-
 
 
 };
