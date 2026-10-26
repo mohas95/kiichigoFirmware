@@ -68,6 +68,32 @@ void MotionCoordinator::request_serial_action(){
     
 }
 
+//TODO: Limit switch integration, wait command
+// void MotionCoordinator::request_limit_switch_action(bool with_reverse){
+
+//     for (const auto&[label, limit_switch]: limit_switches_){
+        
+//         if(limit_switch->get_state(true)){
+            
+//             std::ostringstream motors_to_stop;
+            
+//             for(const std::string& motor_label : limit_switch->get_mapping()) {
+
+//                 if(std::find(disable_action_for_.begin(), disable_action_for_.end(), motor_label)==disable_action_for_.end()){ // only create command if it is not already hit
+//                     double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
+//                     motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
+//                 }
+//             }
+
+//             if(!motors_to_stop.str().empty()){
+//                 std::istringstream iss(motors_to_stop.str());
+//                 command_handlers_["HIT"](iss);
+//             }
+//         }
+//     }
+
+// }
+
 bool MotionCoordinator::action_active(){
 
     bool active_flag=false;
@@ -146,6 +172,19 @@ void MotionCoordinator::loop_forever(){
         }
         tight_loop_contents();
     }
+}
+
+std::vector<LimitSwitch*> MotionCoordinator::get_limit_switches(const std::string& mapping) const {
+    std::vector<LimitSwitch*> switches;
+
+    for (const auto& [label, limit_switch] : limit_switches_) {
+        const auto& mappings = limit_switch->get_mapping();
+        if (std::find(mappings.begin(), mappings.end(), mapping) != mappings.end()) {
+            switches.push_back(limit_switch);
+        }
+    }
+
+    return switches;
 }
 
 
@@ -276,16 +315,16 @@ void MotionCoordinator::register_commands_(){
 
         if (!command_vec.empty()) {
 
+            // Clear pending actions
+            std::queue<std::function<void()>> empty;
+            action_queue_.swap(empty);
+
             // Stop specified motors immediately
             for (const auto& label : command_vec) {
                 stepper_motors_.at(label)->stop();
 
                 LOG_INFO("STOP motor: %s\n", label.c_str());
             }
-
-            // Clear pending actions
-            std::queue<std::function<void()>> empty;
-            action_queue_.swap(empty);
 
             LOG_INFO("INTERRUPT: STOP %s\n", full_line.c_str());
 
@@ -297,6 +336,171 @@ void MotionCoordinator::register_commands_(){
         }
     };
     
+    command_handlers_["HIT"] = [&](std::istringstream& iss) { //test with limit switches
+        /* Command format:
+        HIT X,10.0,0.5 Y,200.5,1.0 Z,-30.0,2.0
+
+        Each token: LABEL,POSITION,REVERSE_REVOLUTIONS
+        This is an IMMEDIATE / INTERRUPT command.
+        */
+
+        struct HitCommand {
+            double position;
+            double reverse_revs;
+            bool previous_direction=true; 
+        };
+
+        std::streampos pos = iss.tellg();
+        std::string full_line = (pos != std::streampos(-1))
+            ? iss.str().substr(static_cast<std::size_t>(pos))
+            : "";
+
+        std::string token;
+        std::unordered_map<std::string, HitCommand> command_dict;
+
+        while (iss >> token) {
+
+            std::istringstream command_stream(token);
+
+            std::string label;
+            std::string position_str;
+            std::string reverse_str;
+            std::string extra;
+
+            // Parse exactly four comma-separated fields
+            if (!std::getline(command_stream, label, ',') ||
+                !std::getline(command_stream, position_str, ',') ||
+                !std::getline(command_stream, reverse_str, ',') ||
+                std::getline(command_stream, extra, ',')) {
+
+                LOG_WARN("Invalid HIT token: %s\n", token.c_str());
+                continue;
+            }
+
+            // Validate motor label
+            if (stepper_motors_.find(label) == stepper_motors_.end()) {
+                LOG_WARN("Unknown motor: %s\n", label.c_str());
+                continue;
+            }
+
+            // Validate numeric inputs
+            if (position_str.empty() || reverse_str.empty() ||
+                !is_float_(position_str) ||
+                !is_float_(reverse_str)) {
+
+                LOG_WARN("Invalid HIT values: %s\n", token.c_str());
+                continue;
+            }
+
+            double position = std::stod(position_str);
+            double reverse_revs = std::stod(reverse_str);
+
+            if (!std::isfinite(position) ||
+                !std::isfinite(reverse_revs) ||
+                reverse_revs < 0.0) {
+
+                LOG_WARN("Invalid HIT parameters: %s\n", token.c_str());
+                continue;
+            }
+
+            command_dict[label] = {
+                position,
+                reverse_revs
+            };
+        }
+
+        if (!command_dict.empty()) {
+
+            // Clear pending actions
+            std::queue<std::function<void()>> empty;
+            action_queue_.swap(empty);
+
+            for (auto& [label, command] : command_dict) {
+
+                auto* motor = stepper_motors_.at(label);
+                auto matching_switches = get_limit_switches(label);
+
+                for (const auto& limit_switch : matching_switches) {
+                    if (limit_switch->get_hit_flag()){
+                        LOG_INFO(
+                            "HIT command ignored for %s: "
+                            "limit switch already hit.\n",
+                            label.c_str()
+                        );
+                        continue;
+                    }
+                } //test with limit switches
+
+                for (const auto& limit_switch : matching_switches) {
+                    limit_switch->set_hit_flag(true);
+                }
+
+                command.previous_direction = motor->get_direction();
+
+                // Stop current movement before reversing
+                motor->stop();
+
+                // Update position at the hit location
+                motor->set_position_rev(command.position);
+
+                for (const auto& limit_switch : matching_switches) {
+                    limit_switch->set_hit_flag(true);
+                }
+
+
+                LOG_INFO(
+                    "INTERRUPT: HIT %s, pos: %0.2f, "
+                    "reversing: %0.2f revs\n",
+                    label.c_str(),
+                    command.position,
+                    command.reverse_revs
+                );
+            }
+
+            action_queue_.push([command_dict, this]() {
+
+                for (const auto& [label, command] : command_dict) {
+                    
+                    auto* motor = stepper_motors_.at(label);
+
+                    
+                    // Reverse relative to previous direction
+                    double reverse_revs = command.previous_direction
+                        ? -command.reverse_revs
+                        : command.reverse_revs;
+
+                    motor->revolve(reverse_revs, motor->get_default_speed());
+
+
+                    // LOG_INFO(
+                    //     "Action: STANDBY %s -> %s\n",
+                    //     label.c_str(),
+                    //     value ? "enabled" : "disabled"
+                    // );
+                }
+            });
+
+            action_queue_.push([command_dict, this]() {
+                // Clear the hit flags after all actions are complete
+
+                for (const auto& [label, value] : command_dict) {
+                    auto matching_switches = get_limit_switches(label);
+
+                    for (const auto& limit_switch : matching_switches) {
+                        limit_switch->set_hit_flag(false);
+                    }
+                }
+            });
+
+            LOG_INFO("INTERRUPT: HIT %s\n", full_line.c_str());
+
+        } else {
+            LOG_WARN(
+                "No valid actions in HIT command: %s\n",
+                full_line.c_str()
+            );
+        }
+    };
 
     command_handlers_["STANDBY"] = [&](std::istringstream& iss) {
         /* Command format:
@@ -376,89 +580,6 @@ void MotionCoordinator::register_commands_(){
             );
         }
     };
-
-
-    // command_handlers_["HIT"] = [&](std::istringstream& iss) {
-    //     /*This command parses commands from serial with this format:
-    //         "HIT X,10.0,0 Y,200.5,1 Z,-30.0,2"
-    //         This is an INTERUPT command 
-    //     */
-
-    //    struct CommandValues{
-    //         double value;
-    //         double rev_value;
-    //    };
-
-    //     std::string full_line = iss.str().substr(iss.tellg());
-    //     std::string token;
-    //     std::unordered_map<std::string, CommandValues> command_dict;
-
-    //     while(iss>>token){
-
-    //         if (token.length() <2 ) {continue;}
-
-    //         std::istringstream command_stream(token);
-    //         std::string label, value_str, rev_value_str;
-
-    //         if(std::getline(command_stream, label, ',') && std::getline(command_stream, value_str, ',') && std::getline(command_stream, rev_value_str)){
-    //             if(stepper_motors_.find(label) == stepper_motors_.end()){
-    //                 LOG_WARN("Unknown motor: %s\n",label.c_str());
-    //                 continue;
-    //             }
-
-    //             if (value_str.empty() || (!is_float_(value_str)) || rev_value_str.empty() || (!is_float_(rev_value_str))) {
-    //                 LOG_WARN("Invalid input: %s\n", value_str.c_str());
-    //                 continue;
-    //             }
-
-    //             double value = std::stod(value_str);
-    //             double rev_value = std::stod(rev_value_str);
-    //             command_dict[label] = {value, rev_value};
-
-    //         }else{
-    //             LOG_WARN("Invalid token: %s\n", token.c_str());
-    //             continue;
-    //         }
-    //     }
-
-    //     if(!command_dict.empty()){ //  && !interupt_flag_
-
-    //         interupt_flag_=true;
-
-    //         for(const auto& [label, command] : command_dict){
-
-    //             if(std::find(disable_action_for_.begin(), disable_action_for_.end(), label)!=disable_action_for_.end()){ // Interupt should run once
-    //                 LOG_WARN("INTERUPT ACTION IN PROGRESS for: %s\n", label.c_str());
-    //             }else{
-
-    //                 stepper_motors_[label]->update_position(command.value);
-
-    //                 if(stepper_motors_[label]->get_direction()){
-    //                     stepper_motors_[label]->revolve(-command.rev_value); 
-    //                 }else{
-    //                     stepper_motors_[label]->revolve(command.rev_value); 
-    //                 }
-    //                 disable_action_for_.push_back(label); //once ran disable so that it doesnt interfere
-
-    //                 LOG_INFO("INTERUPT: HIT %s,pos: %0.2f, reversing: %0.2f revs\n", label.c_str(),command.value, command.rev_value);
-
-    //             }
-
-    //         }
-
-    //         // Clear pending commands
-    //         std::queue<std::function<void()>> empty;
-    //         std::swap(action_queue_, empty);
-
-    //         // Flush any buffered serial input
-    //         // while (getchar_timeout_us(0) != PICO_ERROR_TIMEOUT) {}
-
-    //     }else{
-    //         LOG_WARN("No valid actions in HIT command: %s\n", full_line.c_str());
-    //     }
-
-    // };
-
 
 
 }

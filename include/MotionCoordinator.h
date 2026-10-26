@@ -21,13 +21,16 @@ class MotionCoordinator{
 
         std::string read_serial_line(); //
         void request_serial_action(); //
+        // TODO: Limit switch integration, wait command
+        // void request_limit_switch_action(bool with_reverse=true); //test
+
 
         bool action_active();
-        // TODO: Limit switch integration, wait command
-        // void request_limit_switch_action(bool with_reverse=true);
         void output_states();
         // bool update_actions();
-        void loop_forever();//
+        void loop_forever();
+
+        std::vector<LimitSwitch*> get_limit_switches(const std::string& mapping) const; //test
     
     private:
 

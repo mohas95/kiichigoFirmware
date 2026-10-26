@@ -30,10 +30,13 @@ class LimitSwitch{
         uint8_t get_pin() const;
         double get_reverse_value() const;
         double get_fixed_position() const;
-        std::vector<std::string> get_mapping() const;
+        const std::vector<std::string>& get_mapping() const;
         const std::string& label() const;
 
         bool is_active_low() const;
+
+        void set_hit_flag(bool flag); //test
+        bool get_hit_flag() const; //test
 
 
 
@@ -45,6 +48,7 @@ class LimitSwitch{
         std::string label_;
         double reverse_value_;
 
+        bool hit_flag_ = false; // test: to prevent multiple hits for the same limit switch activation (delete this when it works)
 
         //added lowpass filtering integreation (delete this when it works)
         // Majority window vote (requires continuos fast requests)

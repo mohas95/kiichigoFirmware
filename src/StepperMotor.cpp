@@ -101,6 +101,10 @@ double StepperMotor::get_speed() const{
     return speed_rpm_;
 }
 
+double StepperMotor::get_default_speed() const{
+    return default_speed_rpm_;
+}
+
 bool StepperMotor::get_direction(){
     return driver_.get_direction();
 }
@@ -145,6 +149,14 @@ void StepperMotor::revolve(double revolutions, double speed_rpm){
 
     LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), revolutions);
 
+}
+
+void StepperMotor::set_position(int32_t step_position){
+    position_step_ = step_position;
+}
+
+void StepperMotor::set_position_rev(double rev_position){
+    position_step_ = static_cast<int32_t>(std::round(rev_position * steps_per_rev_));
 }
 
 int32_t StepperMotor::get_position_step() const{

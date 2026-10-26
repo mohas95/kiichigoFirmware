@@ -35,6 +35,7 @@ class StepperMotor {
 
         bool set_speed(double rpm=200);
         double get_speed() const;
+        double get_default_speed() const;
         
         bool get_direction();
         void set_standbyMode(bool);
@@ -47,7 +48,10 @@ class StepperMotor {
         uint32_t get_steps_remaining() const;
 
         void revolve(double revolutions, double speed_rpm);
-        
+       
+        void set_position(int32_t step_position); //test
+        void set_position_rev(double rev_position); //test
+
         int32_t get_position_step() const;
         double get_position_rev() const;
        
@@ -56,6 +60,7 @@ class StepperMotor {
         
         double get_position_rad() const;
         double get_position_rad_wrapped() const;
+
 
         const std::string& label() const;
 
