@@ -8,6 +8,13 @@ The goal of this project is to make a stepper motor motion firmware for RP2040/R
 - includes auxiliary functionality for limit switches
 
 ## Example usage
+
+### useful commands
+```bash
+picocom -b 115200 /dev/ttyACM0
+printf 'stop x  \n' > /dev/ttyACM0
+```
+
 ### motor library usage
 
 Controlling directly from motor driver

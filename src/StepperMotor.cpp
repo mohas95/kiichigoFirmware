@@ -144,7 +144,7 @@ uint32_t StepperMotor::get_steps_remaining() const{
 
 void StepperMotor::revolve(double revolutions, double speed_rpm){
 
-    uint32_t steps = static_cast<int32_t>(std::round(revolutions * steps_per_rev_));
+    int32_t steps = static_cast<int32_t>(std::round(revolutions * steps_per_rev_));
     step_for(steps, speed_rpm);
 
     LOG_DEBUG("%s set for: %.2f revolutions\n", label_.c_str(), revolutions);

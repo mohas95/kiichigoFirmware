@@ -522,6 +522,13 @@ void MotionCoordinator::register_commands_(){
                 // Stop current movement before reversing
                 motor->stop();
 
+                //this is a temporary fix for waiting for the motor to stop
+                while(motor->active()){
+                    tight_loop_contents();
+                }
+                sleep_us(motor->get_step_period());
+
+
                 // Update position at the hit location
                 motor->set_position_rev(command.position);
 
