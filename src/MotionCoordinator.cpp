@@ -69,7 +69,62 @@ void MotionCoordinator::request_serial_action(){
 }
 
 //TODO: Limit switch integration, wait command
-// void MotionCoordinator::request_limit_switch_action(bool with_reverse){
+void MotionCoordinator::request_limit_switch_action() {
+
+    for (const auto& [label, limit_switch] : limit_switches_) {
+
+        bool triggered = limit_switch->get_state(true);
+
+        if (!triggered) {
+            // Reset only after the switch is released
+            bool any_motor_active = false;
+
+            for (const auto& motor_label : limit_switch->get_mapping()) {
+                if (stepper_motors_.at(motor_label)->active()) {
+                    any_motor_active = true;
+                    break;
+                }
+            }
+
+            if (!any_motor_active) {
+                limit_switch->set_hit_flag(false);
+            }
+
+            continue;
+        }
+
+        if (limit_switch->get_hit_flag()) {
+            continue;
+        }
+
+        std::ostringstream motors_to_stop;
+
+        for (const auto& motor_label : limit_switch->get_mapping()) {
+
+            auto* motor = stepper_motors_.at(motor_label);
+
+            double reverse_revs = motor->active()
+                ? limit_switch->get_reverse_value()
+                : 0.0;
+
+            motors_to_stop
+                << motor_label << ","
+                << limit_switch->get_fixed_position() << ","
+                << reverse_revs << " ";
+        }
+
+        if (!motors_to_stop.str().empty()) {
+
+            limit_switch->set_hit_flag(true);
+
+            std::istringstream iss(motors_to_stop.str());
+
+            command_handlers_.at("HIT")(iss);
+        }
+    }
+}
+
+// void MotionCoordinator::request_limit_switch_action(){
 
 //     for (const auto&[label, limit_switch]: limit_switches_){
         
@@ -78,11 +133,29 @@ void MotionCoordinator::request_serial_action(){
 //             std::ostringstream motors_to_stop;
             
 //             for(const std::string& motor_label : limit_switch->get_mapping()) {
+//                 auto* motor = stepper_motors_.at(motor_label);
+//                 // double rev_value = motor->active() ? limit_switch->get_reverse_value() : 0;
 
-//                 if(std::find(disable_action_for_.begin(), disable_action_for_.end(), motor_label)==disable_action_for_.end()){ // only create command if it is not already hit
-//                     double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
-//                     motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
+//                 if(!motor->active()){
+
+//                     limit_switch->set_hit_flag(false);
+//                     rev_value = 0;
+
+//                     // LOG_INFO("INTERRUPT: HIT %s, pos: %0.2f, reversing: %0.2f revs\n", motor_label.c_str(), limit_switch->get_fixed_position(), rev_value);
+//                 }else{
+
+//                     if(limit_switch->get_hit_flag()){
+//                         continue;
+//                     }
+//                     rev_value = limit_switch->get_reverse_value();
 //                 }
+
+//                 motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
+
+//                 // if(std::find(disable_action_for_.begin(), disable_action_for_.end(), motor_label)==disable_action_for_.end()){ // only create command if it is not already hit
+//                 //     double rev_value = with_reverse ? limit_switch->get_reverse_value() : 0;
+//                 //     motors_to_stop << motor_label << "," << limit_switch->get_fixed_position() << "," << rev_value << " ";
+//                 // }
 //             }
 
 //             if(!motors_to_stop.str().empty()){
@@ -92,6 +165,32 @@ void MotionCoordinator::request_serial_action(){
 //         }
 //     }
 
+// }
+
+// void MotionCoordinator::clear_action_queue(const std::string& motor_label) {
+//     if (motor_label.empty()) {
+//         // Clear the entire action queue
+//         std::queue<std::function<void()>> empty;
+//         std::swap(action_queue_, empty);
+//         LOG_INFO("Action queue cleared for all motors.\n");
+//     } else {
+//         // Clear actions related to a specific motor
+//         std::queue<std::function<void()>> new_queue;
+//         while (!action_queue_.empty()) {
+//             auto action = action_queue_.front();
+//             action_queue_.pop();
+
+//             // Here you would need a way to check if the action is related to the specified motor.
+//             // This is a placeholder for that logic.
+//             bool is_related_to_motor = true; // Replace with actual check
+
+//             if (!is_related_to_motor) {
+//                 new_queue.push(action);
+//             }
+//         }
+//         std::swap(action_queue_, new_queue);
+//         LOG_INFO("Action queue cleared for motor: %s\n", motor_label.c_str());
+//     }
 // }
 
 bool MotionCoordinator::action_active(){
@@ -160,10 +259,11 @@ void MotionCoordinator::output_states() {
 void MotionCoordinator::loop_forever(){
     while(true){
         request_serial_action();
+        request_limit_switch_action();
         output_states();
 
-        while(!action_active() && !action_queue_.empty()){
-            auto action = action_queue_.front();
+        if(!action_active() && !action_queue_.empty()){
+            auto action = std::move(action_queue_.front());
             action_queue_.pop();
             action();
             // while(action_active()){
@@ -186,7 +286,6 @@ std::vector<LimitSwitch*> MotionCoordinator::get_limit_switches(const std::strin
 
     return switches;
 }
-
 
 
 
@@ -347,7 +446,7 @@ void MotionCoordinator::register_commands_(){
         struct HitCommand {
             double position;
             double reverse_revs;
-            bool previous_direction=true; 
+            // bool previous_direction=true; 
         };
 
         std::streampos pos = iss.tellg();
@@ -415,27 +514,10 @@ void MotionCoordinator::register_commands_(){
             std::queue<std::function<void()>> empty;
             action_queue_.swap(empty);
 
-            for (auto& [label, command] : command_dict) {
+            for (const auto& [label, command] : command_dict) {
 
                 auto* motor = stepper_motors_.at(label);
-                auto matching_switches = get_limit_switches(label);
-
-                for (const auto& limit_switch : matching_switches) {
-                    if (limit_switch->get_hit_flag()){
-                        LOG_INFO(
-                            "HIT command ignored for %s: "
-                            "limit switch already hit.\n",
-                            label.c_str()
-                        );
-                        continue;
-                    }
-                } //test with limit switches
-
-                for (const auto& limit_switch : matching_switches) {
-                    limit_switch->set_hit_flag(true);
-                }
-
-                command.previous_direction = motor->get_direction();
+                bool previous_direction = motor->get_direction();
 
                 // Stop current movement before reversing
                 motor->stop();
@@ -443,10 +525,12 @@ void MotionCoordinator::register_commands_(){
                 // Update position at the hit location
                 motor->set_position_rev(command.position);
 
-                for (const auto& limit_switch : matching_switches) {
-                    limit_switch->set_hit_flag(true);
-                }
 
+                if (command.reverse_revs>0.0){
+                    // Reverse relative to previous direction
+                    double reverse_revs = previous_direction ? -command.reverse_revs : command.reverse_revs;
+                    motor->revolve(reverse_revs, motor->get_default_speed());
+                }
 
                 LOG_INFO(
                     "INTERRUPT: HIT %s, pos: %0.2f, "
@@ -457,40 +541,40 @@ void MotionCoordinator::register_commands_(){
                 );
             }
 
-            action_queue_.push([command_dict, this]() {
+            // action_queue_.push([command_dict, this]() {
 
-                for (const auto& [label, command] : command_dict) {
+            //     for (const auto& [label, command] : command_dict) {
                     
-                    auto* motor = stepper_motors_.at(label);
+            //         auto* motor = stepper_motors_.at(label);
 
                     
-                    // Reverse relative to previous direction
-                    double reverse_revs = command.previous_direction
-                        ? -command.reverse_revs
-                        : command.reverse_revs;
+            //         // Reverse relative to previous direction
+            //         double reverse_revs = command.previous_direction
+            //             ? -command.reverse_revs
+            //             : command.reverse_revs;
 
-                    motor->revolve(reverse_revs, motor->get_default_speed());
+            //         motor->revolve(reverse_revs, motor->get_default_speed());
 
 
-                    // LOG_INFO(
-                    //     "Action: STANDBY %s -> %s\n",
-                    //     label.c_str(),
-                    //     value ? "enabled" : "disabled"
-                    // );
-                }
-            });
+            //         // LOG_INFO(
+            //         //     "Action: STANDBY %s -> %s\n",
+            //         //     label.c_str(),
+            //         //     value ? "enabled" : "disabled"
+            //         // );
+            //     }
+            // });
 
-            action_queue_.push([command_dict, this]() {
-                // Clear the hit flags after all actions are complete
+            // action_queue_.push([command_dict, this]() {
+            //     // Clear the hit flags after all actions are complete
 
-                for (const auto& [label, value] : command_dict) {
-                    auto matching_switches = get_limit_switches(label);
+            //     for (const auto& [label, value] : command_dict) {
+            //         auto matching_switches = get_limit_switches(label);
 
-                    for (const auto& limit_switch : matching_switches) {
-                        limit_switch->set_hit_flag(false);
-                    }
-                }
-            });
+            //         for (const auto& limit_switch : matching_switches) {
+            //             limit_switch->set_hit_flag(false);
+            //         }
+            //     }
+            // });
 
             LOG_INFO("INTERRUPT: HIT %s\n", full_line.c_str());
 
