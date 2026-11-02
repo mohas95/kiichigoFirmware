@@ -21,29 +21,52 @@ MotionCoordinator::MotionCoordinator(const MotionConfig& config, uint16_t log_ra
 
 }
 
+// std::string MotionCoordinator::read_serial_line() {
+//     std::string buffer;
+//     int c;
+
+//     while (true) {
+//         c = getchar_timeout_us(0);  // non-blocking read
+
+//         if (c == PICO_ERROR_TIMEOUT) {
+//             break;  // no input, return what we have (or nothing)
+//         }
+
+//         if (c == '\r') continue;  // ignore carriage return
+
+//         if (c == '\n') {
+//             return buffer;  // full line received
+//         }
+
+//         buffer += static_cast<char>(c);
+//     }
+
+//     return "";  // nothing read
+// }
 std::string MotionCoordinator::read_serial_line() {
-    std::string buffer;
+    static std::string buffer;  // Persist across function calls
     int c;
 
     while (true) {
-        c = getchar_timeout_us(0);  // non-blocking read
+        c = getchar_timeout_us(0);
 
         if (c == PICO_ERROR_TIMEOUT) {
-            break;  // no input, return what we have (or nothing)
+            break;
         }
 
-        if (c == '\r') continue;  // ignore carriage return
+        if (c == '\r') continue;
 
         if (c == '\n') {
-            return buffer;  // full line received
+            std::string line = std::move(buffer);
+            buffer.clear();
+            return line;
         }
 
         buffer += static_cast<char>(c);
     }
 
-    return "";  // nothing read
+    return "";
 }
-
 
 void MotionCoordinator::request_serial_action(){
 

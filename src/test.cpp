@@ -73,15 +73,15 @@ int main(){
     TB67S128FTG stepper_driver1(0, 1, 2, 3, 4, 5, StepperDriver::StepMode::QUARTER);
     // LimitSwitch home_switch("home", 18, 0, {"z"}, 1, LimitSwitch::PullMode::PULL_UP);
     LimitSwitch z_switch(&mcp,'a', 2, "z_limit", 0, {"z"}, 1, LimitSwitch::PullMode::PULL_UP);
-    StepperMotor stepper1("z", stepper_driver1, 200, 100);
+    StepperMotor stepper1("z", stepper_driver1, 200, 50);
 
     TB67S128FTG stepper_driver2(6, 7, 8, 9, 10, 11, StepperDriver::StepMode::QUARTER);
     LimitSwitch y_switch(&mcp,'a', 1, "y_limit", 0, {"y"}, 0.5, LimitSwitch::PullMode::PULL_UP);
-    StepperMotor stepper2("y", stepper_driver2, 200, 100);
+    StepperMotor stepper2("y", stepper_driver2, 200, 50);
 
     TB67S128FTG stepper_driver3(12, 13, 14, 15, 26, 27, StepperDriver::StepMode::QUARTER);
     LimitSwitch x_switch(&mcp,'a', 0, "x_limit", 0, {"x"}, 0.5, LimitSwitch::PullMode::PULL_UP);
-    StepperMotor stepper3("x", stepper_driver3, 200, 100);
+    StepperMotor stepper3("x", stepper_driver3, 200, 50);
 
 
     config.stepper_motors={&stepper1, &stepper2, &stepper3};
