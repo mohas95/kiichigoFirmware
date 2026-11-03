@@ -43,8 +43,8 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 add_executable( ${PROJECT_NAME} 
-            # src/kiichigoFirmware.cpp
-            src/test.cpp 
+            src/kiichigoFirmware.cpp # Production Code
+            # src/test.cpp #For testing only
             src/Log.cpp
             src/StepperDriver.cpp
             src/TB67S128FTG.cpp
@@ -52,7 +52,7 @@ add_executable( ${PROJECT_NAME}
             src/MCP23S17.cpp
             src/LimitSwitch.cpp
             src/MotionCoordinator.cpp
-            # src/MotionPlanner.cpp 
+            # src/MotionPlanner.cpp #Depreciated
             )
 
 pico_set_program_name(${PROJECT_NAME} "kiichigoFirmware")
