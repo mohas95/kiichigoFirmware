@@ -249,9 +249,14 @@ All kinds of feedback and contributions are welcome.
 
 ## Change Log
 ### 1.0.0 (stable release)
-- 
+- new serial command scheme for motorCoordinator package:
+    1. MOVE <motorlabel1>,<revolutions>,<`rpm`>  <motorlabel2>,<revolutions>,<`rpm`>  ...: This command sets the number of revolutions that each motor in the motion planner should make, accepts float (ex. "MOVE x,100,50 y,-100,50 z,10,100")
+    2. STANDBY <`motorlabel1`>,<`true`> <`motorlabel2`>,<`false`> ... : This command sets the number of speed of each motor in the motion planner, accepts bool or 1/0 (ex. "STANDBY x,1 y,0 z,true")
+    3. HIT <`motorlabel1`>,<`set_position`>,<'reverse_after_hit'> <`motorlabel2`>,<`set_position`><'reverse_after_hit'> ... : This (immediate interupt) command interrupts operations and stops stepper motors and reverses motor, meant for limit switch operation, accepts double for position and input. It also revolves # if revolution in the opposite direction of the motion of the motor so that it does not rest on any limit switch (HIT X,10.0,0 Y,200.5,1 Z,-30.0,2")
+    4. STOP <`motorlabel1`> <`motorlabel2`> ... : This command interrupts operations and stops stepper motors, but does not change the position tracking, just provide label name(ex. "STOP x y z")
+
 ### 0.1.0 (Not released yet)
-- tested and operational ready for first version depoloyment
+- tested and operational ready for first version deployment
 - Overhauling timing process from naive hardware timing to interupt request(IRQ) and Interrupt Service Routines(ISR)
 
 ### 0.0.1 (Not released yet)
