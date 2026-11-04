@@ -109,7 +109,7 @@ double LimitSwitch::get_fixed_position() const{
     return fixed_position_; 
 }
 
-std::vector<std::string> LimitSwitch::get_mapping() const{
+const std::vector<std::string>& LimitSwitch::get_mapping() const{
     return mapping_;
 }
 
@@ -120,4 +120,12 @@ const std::string& LimitSwitch::label() const{
 
 bool LimitSwitch::is_active_low() const {
     return pull_mode_ == PullMode::PULL_UP || pull_mode_ == PullMode::EXTERNAL_UP;
+}
+
+void LimitSwitch::set_hit_flag(bool flag){
+    hit_flag_ = flag;
+}
+
+bool LimitSwitch::get_hit_flag() const{
+    return hit_flag_;
 }
